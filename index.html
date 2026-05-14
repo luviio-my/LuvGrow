@@ -507,86 +507,614 @@
   /* LOADING SKELETON */
   .skeleton{background:linear-gradient(90deg,#f0f0eb 25%,#e8e8e3 50%,#f0f0eb 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
 
-  /* RESPONSIVE - Enhanced Mobile First */
+  /* ========================================== */
+  /* MOBILE-FIRST RESPONSIVE (ENHANCED)        */
+  /* ========================================== */
+
+  /* Tablet and below */
   @media(max-width:1023px){
-    .container{padding:0 28px}header{padding:16px 28px}nav .nav-link{display:none}.hamburger{display:flex}
-    .hero h1{font-size:52px;line-height:58px}.section-title{font-size:38px;line-height:46px}
-    .features-grid{grid-template-columns:1fr 1fr}.showcase-grid{grid-template-columns:1fr}
-    .pricing-grid{grid-template-columns:1fr 1fr}.showcase-left h2{font-size:38px;line-height:46px}
-    .cta-card h2{font-size:38px;line-height:46px}.footer-grid{grid-template-columns:1fr 1fr}
+    .container{padding:0 28px}
+    header{padding:16px 28px}
+    nav .nav-link{display:none}
+    .hamburger{display:flex}
+    
+    /* Hero adjustments */
+    .hero{padding:80px 0 60px}
+    .hero h1{font-size:52px;line-height:58px}
+    .hero p{font-size:16px;line-height:26px}
+    .hero-badge{font-size:10px;padding:6px 14px}
+    
+    /* Section headers smaller */
+    .section-label{font-size:11px;padding:5px 12px}
+    .section-title{font-size:38px;line-height:46px}
+    .section-desc{font-size:15px;line-height:24px}
+    
+    /* Features grid 2 columns */
+    .features-grid{grid-template-columns:1fr 1fr;gap:20px}
+    .feature-card{padding:28px 22px}
+    .feature-icon{width:46px;height:46px}
+    .feature-card h3{font-size:19px}
+    .feature-card p{font-size:14px;line-height:22px}
+    
+    /* Showcase grid stack */
+    .showcase-grid{grid-template-columns:1fr;gap:32px}
+    .showcase-left h2{font-size:38px;line-height:46px}
+    .showcase-left p{font-size:15px;line-height:24px}
+    .showcase-stats{gap:24px}
+    .stat-number{font-size:32px}
+    
+    /* Membership card full width */
+    .membership-card{max-width:100%}
+    .membership-header{padding:22px 24px}
+    .membership-header h3{font-size:22px}
+    .membership-body{padding:24px}
+    .membership-benefits li{font-size:14px;padding:8px 0}
+    
+    /* Pricing grid 2 columns */
+    .pricing-grid{grid-template-columns:1fr 1fr;gap:20px}
+    .pricing-card{padding:28px 22px}
+    .pricing-price{font-size:40px}
+    .pricing-desc{font-size:14px}
+    .pricing-features li{font-size:13px}
+    
+    /* CTA card */
+    .cta-card{padding:56px 36px}
+    .cta-card h2{font-size:38px;line-height:46px}
+    .cta-card p{font-size:15px}
+    
+    /* Footer */
+    .footer-grid{grid-template-columns:1fr 1fr;gap:32px}
+    .footer-brand p{font-size:13px}
+    
+    /* Testimonials */
     .test-main-grid{grid-template-columns:1fr}
+    .test-h1{font-size:32px}
+    .test-metric-lg{font-size:44px}
+    .test-metric-sm{font-size:28px}
+    .test-card{padding:26px}
+    .test-quote-mark{font-size:28px}
+    .test-text{font-size:14px}
+    .test-person-name{font-size:14px}
+    .test-person-role{font-size:12px}
+    
+    /* Product features */
     .product-features-grid{grid-template-columns:1fr}
+    .product-feature{padding:28px}
+    .product-feature h3{font-size:20px}
+    .product-feature p{font-size:14px}
+    
+    /* Services */
     .services-grid{grid-template-columns:1fr}
+    .service-card{padding:28px 22px}
+    .service-card h3{font-size:21px}
+    .service-card > p{font-size:14px}
+    .service-features li{font-size:13px}
+    
+    /* Tools */
     .tools-grid{grid-template-columns:1fr}
-    .team-grid{grid-template-columns:1fr 1fr}
-    .contact-grid{grid-template-columns:1fr}
-    .form-row{grid-template-columns:1fr}
+    
+    /* Company */
     .company-values{grid-template-columns:1fr}
-    .page-hero h1{font-size:42px;line-height:48px}
-    .content-page h1{font-size:36px;line-height:42px}
-    .content-page h2{font-size:26px}
-    .profile-card{max-width:100%}
-  }
-  @media(max-width:767px){
-    .container{padding:0 20px}header{padding:14px 20px}
-    .hero{padding:70px 0 50px}.hero h1{font-size:38px;line-height:46px}
-    .hero p{font-size:15px;line-height:24px}
-    .section-title{font-size:28px;line-height:36px}
-    .features-grid{grid-template-columns:1fr}.pricing-grid{grid-template-columns:1fr}
-    .showcase-stats{flex-direction:column;gap:18px}
-    .cta-card{padding:44px 28px}.cta-card h2{font-size:30px;line-height:37px}
-    .footer-grid{grid-template-columns:1fr;gap:28px}
-    .footer-bottom{flex-direction:column;gap:14px;text-align:center}
-    .stat-number{font-size:30px}
-    .test-h1{font-size:28px}
-    .test-metric-lg{font-size:40px}
-    .test-card{padding:24px}
-    .test-nested-grid{grid-template-columns:1fr}
-    .test-bottom{justify-content:center;flex-direction:column;gap:16px}
-    .test-pill,.test-rating,.test-btn{width:100%;justify-content:center}
-    .pricing-page-hero h1,.page-hero h1{font-size:34px;line-height:40px}
-    .services-grid{grid-template-columns:1fr}
+    .company-value{padding:24px}
+    .company-value h3{font-size:19px}
+    .company-value p{font-size:14px}
     .team-grid{grid-template-columns:1fr 1fr}
-    .hero-stats{flex-direction:column;gap:24px}
-    .contact-info h2{font-size:30px;line-height:36px}
-    .auth-card,.profile-card{padding:32px 24px}
-    .membership-card{margin:0}
+    
+    /* Contact */
+    .contact-grid{grid-template-columns:1fr;gap:36px}
+    .contact-info h2{font-size:34px;line-height:42px}
+    .contact-info > p{font-size:15px}
+    .contact-form-card{padding:28px}
+    
+    /* Form */
+    .form-row{grid-template-columns:1fr}
+    
+    /* Page hero */
+    .page-hero{padding:56px 0 36px}
+    .page-hero h1{font-size:42px;line-height:48px}
+    .page-hero p{font-size:15px}
+    
+    .pricing-page-hero h1{font-size:42px;line-height:48px}
+    
+    /* Content pages */
     .content-page{padding:60px 0}
-    .content-page h1{font-size:32px;line-height:38px}
-    .content-page h2{font-size:24px;margin:36px 0 14px}
+    .content-page h1{font-size:36px;line-height:42px}
+    .content-page h2{font-size:26px;margin:36px 0 14px}
     .content-page h3{font-size:20px;margin:24px 0 10px}
     .content-page p,.content-page ul,.content-page ol{font-size:15px;line-height:26px}
+    
+    /* Auth & Profile cards */
+    .auth-card,.profile-card{max-width:100%}
+    .auth-card{padding:36px 28px}
+    .profile-card{padding:36px 28px}
+    
+    /* Compare table */
+    .compare-section h2{font-size:30px}
   }
-  @media(max-width:479px){
-    .container{padding:0 16px}header{padding:12px 16px}
-    .logo{font-size:16px}
-    .hero{padding:50px 0 40px}.hero h1{font-size:30px;line-height:38px}
-    .hero-badge{font-size:10px;padding:6px 14px}
-    .hero-actions{flex-direction:column;align-items:stretch}
-    .hero-actions .btn-primary,.hero-actions .btn-secondary{width:100%;justify-content:center}
-    .section-label{font-size:10px;padding:5px 12px}
-    .section-title{font-size:24px;line-height:32px}
-    .feature-card{padding:24px 20px}
-    .feature-icon{width:44px;height:44px}
-    .feature-card h3{font-size:19px}
-    .pricing-card{padding:28px 20px}
-    .pricing-price{font-size:38px}
-    .cta-card{padding:36px 20px}.cta-card h2{font-size:26px;line-height:34px}
-    .auth-card,.profile-card{padding:24px 18px;border-radius:var(--radius-md)}
-    .profile-header{flex-direction:column;text-align:center}
+
+  /* Mobile portrait */
+  @media(max-width:767px){
+    .container{padding:0 20px}
+    header{padding:14px 20px}
+    .logo{font-size:17px}
+    .logo-dot{width:8px;height:8px}
+    
+    /* Hero compact */
+    .hero{padding:60px 0 48px}
+    .hero h1{font-size:36px;line-height:44px}
+    .hero h1 .accent::after{height:6px}
+    .hero p{font-size:14px;line-height:22px;max-width:100%}
+    .hero-actions{flex-direction:column;align-items:stretch;gap:10px}
+    .hero-actions .btn-primary,
+    .hero-actions .btn-secondary{width:100%;justify-content:center;padding:12px 20px;font-size:14px}
+    
+    /* Stats vertical */
+    .hero-stats{flex-direction:column;gap:20px;align-items:center}
+    .hero-stat{min-width:auto}
+    .hero-stat-num{font-size:28px}
+    .hero-stat-label{font-size:11px}
+    
+    /* Sections tighter */
+    section{padding:56px 0}
+    .section-header{margin-bottom:40px}
+    .section-label{font-size:10px;padding:4px 10px;letter-spacing:.06em}
+    .section-title{font-size:28px;line-height:36px;margin-bottom:12px}
+    .section-desc{font-size:14px;line-height:22px}
+    
+    /* Feature cards single column, compact */
+    .features-grid{grid-template-columns:1fr;gap:16px}
+    .feature-card{padding:22px 18px;border-radius:14px}
+    .feature-icon{width:42px;height:42px;margin-bottom:16px}
+    .feature-card h3{font-size:17px;line-height:24px;margin-bottom:8px}
+    .feature-card p{font-size:13px;line-height:20px}
+    
+    /* Showcase / membership */
+    .showcase{padding:48px 0}
+    .showcase-grid{gap:24px}
+    .showcase-left h2{font-size:28px;line-height:36px}
+    .showcase-left p{font-size:14px;line-height:22px}
+    .showcase-stats{flex-direction:column;gap:16px;align-items:flex-start}
+    .stat-number{font-size:26px}
+    .stat-label{font-size:11px}
+    
+    .membership-card{border-radius:14px}
+    .membership-header{padding:20px 20px}
+    .membership-header h3{font-size:20px}
+    .membership-header p{font-size:12px}
+    .membership-body{padding:20px}
+    .membership-benefits li{font-size:13px;padding:8px 0;gap:10px}
+    .benefit-icon{width:20px;height:20px}
+    .membership-input{padding:14px 16px;font-size:15px}
+    .membership-btn{padding:12px 20px;font-size:14px}
+    
+    /* Pricing single column */
+    .pricing-grid{grid-template-columns:1fr;gap:16px}
+    .pricing-card{padding:24px 20px;border-radius:14px}
+    .pricing-badge{font-size:10px;padding:4px 12px;top:10px;right:12px}
+    .pricing-name{font-size:10px;letter-spacing:.06em}
+    .pricing-price{font-size:36px}
+    .pricing-price span{font-size:14px}
+    .pricing-desc{font-size:13px;line-height:20px;margin-bottom:18px;padding-bottom:18px}
+    .pricing-features{margin-bottom:20px}
+    .pricing-features li{font-size:13px;padding:5px 0;gap:8px}
+    .pricing-features li .check{width:18px;height:18px}
+    .pricing-features li .check svg{width:10px;height:10px}
+    .pricing-card .btn-primary,
+    .pricing-card .btn-secondary{padding:11px 20px;font-size:13px}
+    
+    /* CTA */
+    .cta-section{padding:64px 0}
+    .cta-card{padding:40px 24px;border-radius:14px}
+    .cta-card h2{font-size:28px;line-height:36px}
+    .cta-card p{font-size:14px;line-height:22px;margin-bottom:28px}
+    .cta-card .btn-primary{padding:12px 24px;font-size:14px}
+    
+    /* Footer stacked */
+    footer{padding:36px 0}
+    .footer-grid{grid-template-columns:1fr;gap:24px}
+    .footer-col h4{font-size:11px;margin-bottom:14px}
+    .footer-col a{font-size:13px;padding:4px 0}
+    .footer-bottom{flex-direction:column;gap:12px;text-align:center;margin-top:28px;padding-top:20px}
+    .footer-bottom p{font-size:12px}
+    .social-btn{width:36px;height:36px}
+    
+    /* Testimonials compact */
+    .testimonials-wrap{padding:48px 16px 56px}
+    .test-eyebrow-text{font-size:12px}
+    .test-h1{font-size:24px;margin:12px 0 8px}
+    .test-h1-sub{font-size:18px}
+    .test-sub{font-size:14px;margin-bottom:32px}
+    .test-main-grid{gap:18px}
+    .test-nested-grid{grid-template-columns:1fr;gap:18px}
+    .test-card{padding:20px 18px;border-radius:18px}
+    .test-card.dark{padding:20px 18px}
+    .test-metric-lg{font-size:36px;margin-bottom:6px}
+    .test-metric-sm{font-size:24px}
+    .test-metric-label{font-size:13px}
+    .test-quote-mark{font-size:26px;margin:8px 0 6px}
+    .test-text{font-size:13px;line-height:1.6}
+    .test-person{gap:10px;margin-top:16px}
+    .test-avatar{width:40px;height:40px;font-size:12px}
+    .test-person-name{font-size:13px}
+    .test-person-role{font-size:11px}
+    .test-logo{font-size:18px;right:16px;bottom:16px}
+    .test-bottom{flex-direction:column;gap:14px;margin-top:32px}
+    .test-pill{padding:12px 16px;font-size:13px}
+    .test-pill-emoji{width:34px;height:34px;font-size:16px}
+    .test-rating{font-size:13px}
+    .test-stars{font-size:15px;letter-spacing:2px}
+    .test-rating-sub{font-size:11px}
+    .test-btn{padding:12px 18px;font-size:13px;width:100%;justify-content:center}
+    
+    /* Product page */
+    .product-features-grid{gap:16px;margin-bottom:48px}
+    .product-feature{padding:24px 20px;border-radius:14px}
+    .product-feature .pf-icon{width:46px;height:46px;margin-bottom:14px}
+    .product-feature h3{font-size:18px;margin-bottom:8px}
+    .product-feature p{font-size:13px;line-height:1.6}
+    
+    .tools-section{padding:56px 0}
+    .tools-grid{gap:16px;margin-top:32px}
+    .tool-card{border-radius:14px}
+    .tool-header{padding:16px 18px;gap:10px}
+    .tool-icon{width:36px;height:36px}
+    .tool-title{font-size:16px}
+    .tool-body{padding:18px}
+    .tool-desc{font-size:13px}
+    .color-swatch{width:48px;height:48px}
+    .color-hex{font-size:16px}
+    .color-preset{width:28px;height:28px}
+    .external-tool-content{padding:18px}
+    .external-tool-title{font-size:16px}
+    .external-tool-desc{font-size:13px}
+    
+    /* Services */
+    .services-grid{gap:16px;margin-bottom:48px}
+    .service-card{padding:24px 20px;border-radius:14px}
+    .service-card .svc-icon{width:48px;height:48px;margin-bottom:16px}
+    .service-card h3{font-size:19px;margin-bottom:10px}
+    .service-card > p{font-size:13px;line-height:1.6;margin-bottom:16px}
+    .service-features li{font-size:13px;line-height:22px}
+    .service-features li .svc-check{width:16px;height:16px}
+    .service-action{padding-top:12px}
+    .service-action .btn-ghost{font-size:13px}
+    
+    /* Company */
+    .company-values{gap:16px;margin:40px 0}
+    .company-value{padding:22px 20px;border-radius:14px}
+    .company-value h3{font-size:17px;margin-bottom:6px}
+    .company-value p{font-size:13px;line-height:1.6}
+    .team-grid{gap:16px}
+    .team-card{padding:20px 14px;border-radius:14px}
+    .team-card .team-avatar{width:56px;height:56px;font-size:18px}
+    .team-card h4{font-size:14px}
+    .team-card p{font-size:12px}
+    
+    /* Contact */
+    .contact-section{padding:56px 0}
+    .contact-grid{gap:28px}
+    .contact-info h2{font-size:26px;line-height:34px}
+    .contact-info > p{font-size:14px;line-height:22px;margin-bottom:24px}
+    .contact-details{gap:14px}
+    .contact-item{padding:14px;border-radius:10px;gap:12px}
+    .contact-item-icon{width:38px;height:38px}
+    .contact-item-text strong{font-size:13px}
+    .contact-item-text span{font-size:12px}
+    .contact-form-card{padding:24px 20px;border-radius:14px}
+    .form-group{margin-bottom:16px}
+    .form-group label{font-size:11px;margin-bottom:6px;letter-spacing:.03em}
+    .form-group input,
+    .form-group textarea,
+    .form-group select{padding:12px 14px;font-size:15px}
+    .form-group textarea{min-height:100px}
+    .contact-form-card .btn-primary{padding:12px 20px;font-size:14px}
+    
+    /* Page hero mobile */
+    .page-hero{padding:48px 0 32px}
+    .page-hero h1{font-size:32px;line-height:38px}
+    .page-hero p{font-size:14px;line-height:22px}
+    
+    .pricing-page-hero{padding:48px 0 32px}
+    .pricing-page-hero h1{font-size:32px;line-height:38px}
+    .pricing-page-hero p{font-size:14px}
+    
+    /* Content pages */
+    .content-page{padding:48px 0}
+    .content-page .container{padding:0 20px}
+    .content-page h1{font-size:28px;line-height:36px}
+    .content-page h2{font-size:22px;margin:32px 0 12px;padding-bottom:10px}
+    .content-page h3{font-size:18px;margin:24px 0 8px}
+    .content-page p{font-size:14px;line-height:24px;margin-bottom:16px}
+    .content-page ul,.content-page ol{font-size:14px;line-height:24px;margin:0 0 16px 20px}
+    .content-page li{margin-bottom:6px}
+    .content-page blockquote{padding:12px 18px;font-size:14px;line-height:22px}
+    .content-page code{font-size:12px;padding:1px 6px}
+    .content-page pre{padding:16px;font-size:12px;line-height:1.6;margin:16px 0}
+    .last-updated{font-size:12px;margin-top:36px;padding-top:20px}
+    
+    /* Auth pages */
+    .auth-page{padding:32px 16px;min-height:calc(100vh - 65px)}
+    .auth-card{padding:28px 22px;border-radius:14px}
+    .auth-card h2{font-size:24px}
+    .auth-card .auth-sub{font-size:14px;margin-bottom:24px}
+    .auth-field{margin-bottom:16px}
+    .auth-field label{font-size:11px;margin-bottom:5px}
+    .auth-field input{padding:12px 14px;font-size:15px}
+    .auth-forgot{font-size:12px;margin-bottom:18px}
+    .auth-divider{font-size:12px;margin:18px 0}
+    .auth-social-btn{padding:11px;font-size:13px}
+    .auth-footer{font-size:13px;margin-top:20px}
+    .auth-error{font-size:12px;padding:10px 14px}
+    
+    /* Profile page */
+    .profile-page{padding:32px 16px;min-height:calc(100vh - 65px)}
+    .profile-card{padding:28px 22px;border-radius:14px}
+    .profile-header{gap:16px;margin-bottom:24px;padding-bottom:20px}
     .profile-avatar-lg{width:56px;height:56px;font-size:20px}
+    .profile-info h2{font-size:20px}
+    .profile-info p{font-size:12px}
     .profile-form{gap:14px}
-    .profile-actions{flex-direction:column}
-    .membership-body{padding:24px 20px}
-    .membership-header h3{font-size:22px}
-    .membership-benefits li{font-size:14px}
-    .test-card{padding:20px;border-radius:18px}
-    .test-person{flex-direction:column;align-items:flex-start;gap:8px}
-    .test-avatar{width:40px;height:40px}
-    .contact-form-card{padding:24px 20px}
-    .social-btn{width:34px;height:34px}
+    .profile-form label{font-size:12px;margin-bottom:4px}
+    .profile-form input,
+    .profile-form textarea{padding:12px 14px;font-size:15px}
+    .profile-actions{flex-direction:column;gap:10px;margin-top:4px}
+    .profile-actions button{min-width:auto}
+    
+    /* Compare table */
+    .compare-section{padding:48px 0}
+    .compare-section h2{font-size:24px}
+    .compare-section .compare-sub{font-size:14px;margin-bottom:28px}
+    .compare-table th,.compare-table td{padding:12px 16px;font-size:13px}
+    .compare-table .plan-header{font-size:14px}
+    .compare-table .cat-row td{padding:10px 16px;font-size:12px}
+    
+    /* Pricing CTA */
+    .pricing-cta-section{padding:48px 0}
+    .pricing-cta-card{padding:36px 24px;border-radius:14px}
+    .pricing-cta-card h3{font-size:24px}
+    .pricing-cta-card p{font-size:14px}
+    
+    /* Toast mobile */
     .toast-container{left:16px;right:16px;bottom:16px}
-    .toast{max-width:calc(100vw - 32px);font-size:13px;padding:12px 16px}
+    .toast{max-width:calc(100vw - 32px);font-size:13px;padding:12px 16px;border-radius:10px}
+  }
+
+  /* Small mobile */
+  @media(max-width:479px){
+    .container{padding:0 16px}
+    header{padding:12px 16px}
+    .logo{font-size:15px}
+    .hamburger{padding:6px}
+    
+    .hero{padding:48px 0 40px}
+    .hero h1{font-size:28px;line-height:36px}
+    .hero h1 .accent::after{height:5px}
+    .hero p{font-size:13px;line-height:20px;margin-bottom:28px}
+    .hero-badge{font-size:9px;padding:6px 14px;gap:4px}
+    .hero-badge .pulse-dot{width:5px;height:5px}
+    
+    .hero-stats{gap:16px;padding-top:28px}
+    .hero-stat-num{font-size:24px}
+    .hero-stat-label{font-size:10px;letter-spacing:.03em}
+    
+    section{padding:44px 0}
+    .section-header{margin-bottom:32px}
+    .section-label{font-size:9px;padding:4px 10px;letter-spacing:.05em}
+    .section-title{font-size:24px;line-height:30px;margin-bottom:10px}
+    .section-desc{font-size:13px;line-height:20px}
+    
+    .features-grid{gap:12px}
+    .feature-card{padding:18px 16px;border-radius:12px}
+    .feature-icon{width:38px;height:38px;margin-bottom:14px}
+    .feature-card h3{font-size:16px;line-height:22px;margin-bottom:6px}
+    .feature-card p{font-size:12px;line-height:18px}
+    
+    .showcase{padding:36px 0}
+    .showcase-grid{gap:20px}
+    .showcase-left h2{font-size:24px;line-height:30px}
+    .showcase-left p{font-size:13px;line-height:20px;margin-bottom:24px}
+    .showcase-stats{gap:12px}
+    .stat-number{font-size:22px}
+    .stat-label{font-size:10px}
+    
+    .membership-card{border-radius:12px}
+    .membership-header{padding:18px 18px}
+    .membership-header h3{font-size:18px}
+    .membership-header p{font-size:11px}
+    .membership-body{padding:18px}
+    .membership-benefits li{font-size:12px;padding:7px 0;gap:8px}
+    .benefit-icon{width:18px;height:18px}
+    .benefit-icon svg{width:10px;height:10px}
+    .membership-input{padding:12px 14px;font-size:14px}
+    .membership-btn{padding:11px 18px;font-size:13px}
+    
+    .pricing-grid{gap:12px}
+    .pricing-card{padding:20px 18px;border-radius:12px}
+    .pricing-badge{font-size:9px;padding:3px 10px}
+    .pricing-name{font-size:9px;letter-spacing:.05em}
+    .pricing-price{font-size:32px}
+    .pricing-price span{font-size:13px}
+    .pricing-desc{font-size:12px;line-height:18px;margin-bottom:16px;padding-bottom:16px}
+    .pricing-features{margin-bottom:16px}
+    .pricing-features li{font-size:12px;padding:4px 0;gap:8px}
+    .pricing-features li .check{width:16px;height:16px}
+    .pricing-features li .check svg{width:9px;height:9px}
+    .pricing-card .btn-primary,
+    .pricing-card .btn-secondary{padding:10px 18px;font-size:12px}
+    
+    .cta-section{padding:48px 0}
+    .cta-card{padding:32px 20px;border-radius:12px}
+    .cta-card h2{font-size:24px;line-height:30px}
+    .cta-card p{font-size:13px;line-height:20px;margin-bottom:24px}
+    .cta-card .btn-primary{padding:11px 20px;font-size:13px}
+    
+    footer{padding:28px 0}
+    .footer-grid{gap:20px}
+    .footer-brand p{font-size:12px;line-height:20px}
+    .footer-col h4{font-size:10px;margin-bottom:12px;letter-spacing:.04em}
+    .footer-col a{font-size:12px;padding:3px 0}
+    .footer-bottom p{font-size:11px}
+    .social-btn{width:32px;height:32px}
+    .social-btn svg{width:14px;height:14px}
+    
+    .testimonials-wrap{padding:36px 12px 44px}
+    .test-eyebrow-text{font-size:11px}
+    .test-corner{width:14px;height:14px}
+    .test-h1{font-size:20px;margin:10px 0 6px}
+    .test-h1-sub{font-size:16px}
+    .test-sub{font-size:13px;margin-bottom:24px}
+    .test-main-grid{gap:14px}
+    .test-nested-grid{gap:14px}
+    .test-card{padding:16px 14px;border-radius:14px}
+    .test-card.dark{padding:16px 14px}
+    .test-metric-lg{font-size:30px;margin-bottom:4px}
+    .test-metric-sm{font-size:20px}
+    .test-metric-label{font-size:12px}
+    .test-metric-line{gap:10px;margin-bottom:8px}
+    .test-quote-mark{font-size:22px;margin:6px 0 4px}
+    .test-text{font-size:12px;line-height:1.55}
+    .test-person{gap:8px;margin-top:14px;flex-direction:column;align-items:flex-start}
+    .test-avatar{width:34px;height:34px;font-size:11px}
+    .test-person-name{font-size:12px}
+    .test-person-role{font-size:10px}
+    .test-logo{font-size:16px;right:12px;bottom:12px}
+    .test-bottom{gap:12px;margin-top:24px}
+    .test-pill{padding:10px 14px;font-size:12px}
+    .test-pill-emoji{width:30px;height:30px;font-size:14px}
+    .test-rating{font-size:12px}
+    .test-stars{font-size:13px;letter-spacing:1.5px}
+    .test-rating-sub{font-size:10px}
+    .test-btn{padding:10px 16px;font-size:12px}
+    
+    .product-features-grid{gap:12px;margin-bottom:36px}
+    .product-feature{padding:20px 16px;border-radius:12px}
+    .product-feature .pf-icon{width:40px;height:40px;margin-bottom:12px}
+    .product-feature h3{font-size:16px;margin-bottom:6px}
+    .product-feature p{font-size:12px;line-height:1.55}
+    
+    .tools-section{padding:44px 0}
+    .tools-grid{gap:12px;margin-top:24px}
+    .tool-card{border-radius:12px}
+    .tool-header{padding:14px 16px;gap:8px}
+    .tool-icon{width:32px;height:32px}
+    .tool-title{font-size:14px}
+    .tool-body{padding:14px}
+    .tool-desc{font-size:12px}
+    .color-picker-wrapper{gap:12px}
+    .color-display{padding:12px;gap:12px}
+    .color-swatch{width:42px;height:42px}
+    .color-hex{font-size:14px}
+    .color-rgb{font-size:11px}
+    .color-preset{width:24px;height:24px;border-radius:6px}
+    .external-tool-content{padding:14px}
+    .external-tool-title{font-size:14px;gap:8px}
+    .external-tool-title .external-icon{width:30px;height:30px}
+    .external-tool-desc{font-size:12px}
+    .external-tool-url{font-size:11px}
+    .external-tool-arrow{font-size:12px}
+    
+    .services-grid{gap:12px;margin-bottom:36px}
+    .service-card{padding:20px 16px;border-radius:12px}
+    .service-card .svc-icon{width:42px;height:42px;margin-bottom:14px}
+    .service-card h3{font-size:17px;margin-bottom:8px}
+    .service-card > p{font-size:12px;line-height:1.55;margin-bottom:14px}
+    .service-features{margin-bottom:14px}
+    .service-features li{font-size:12px;line-height:20px;gap:8px}
+    .service-features li .svc-check{width:15px;height:15px}
+    .service-features li .svc-check svg{width:9px;height:9px}
+    .service-action{padding-top:10px}
+    .service-action .btn-ghost{font-size:12px}
+    
+    .company-values{gap:12px;margin:32px 0}
+    .company-value{padding:18px 16px;border-radius:12px}
+    .company-value h3{font-size:15px;margin-bottom:4px}
+    .company-value p{font-size:12px;line-height:1.55}
+    .team-grid{gap:12px}
+    .team-card{padding:16px 12px;border-radius:12px}
+    .team-card .team-avatar{width:48px;height:48px;font-size:16px}
+    .team-card h4{font-size:13px}
+    .team-card p{font-size:11px}
+    
+    .contact-section{padding:44px 0}
+    .contact-grid{gap:20px}
+    .contact-info h2{font-size:22px;line-height:28px}
+    .contact-info > p{font-size:13px;line-height:20px;margin-bottom:20px}
+    .contact-details{gap:10px}
+    .contact-item{padding:12px;border-radius:8px;gap:10px}
+    .contact-item-icon{width:34px;height:34px}
+    .contact-item-text strong{font-size:12px}
+    .contact-item-text span{font-size:11px}
+    .contact-form-card{padding:20px 16px;border-radius:12px}
+    .form-group{margin-bottom:14px}
+    .form-group label{font-size:10px;margin-bottom:5px;letter-spacing:.02em}
+    .form-group input,
+    .form-group textarea,
+    .form-group select{padding:11px 12px;font-size:14px}
+    .form-group textarea{min-height:90px}
+    .contact-form-card .btn-primary{padding:11px 18px;font-size:13px}
+    
+    .page-hero{padding:40px 0 28px}
+    .page-hero h1{font-size:26px;line-height:32px}
+    .page-hero p{font-size:13px;line-height:20px}
+    
+    .pricing-page-hero{padding:40px 0 28px}
+    .pricing-page-hero h1{font-size:26px;line-height:32px}
+    .pricing-page-hero p{font-size:13px}
+    
+    .content-page{padding:36px 0}
+    .content-page .container{padding:0 16px}
+    .content-page h1{font-size:24px;line-height:30px}
+    .content-page h2{font-size:19px;margin:28px 0 10px;padding-bottom:8px}
+    .content-page h3{font-size:16px;margin:20px 0 6px}
+    .content-page p{font-size:13px;line-height:22px;margin-bottom:14px}
+    .content-page ul,.content-page ol{font-size:13px;line-height:22px;margin:0 0 14px 18px}
+    .content-page li{margin-bottom:4px}
+    .content-page blockquote{padding:10px 14px;font-size:13px;line-height:20px;border-left-width:3px}
+    .content-page code{font-size:11px;padding:1px 5px}
+    .content-page pre{padding:14px;font-size:11px;line-height:1.55;margin:14px 0;border-radius:10px}
+    .last-updated{font-size:11px;margin-top:28px;padding-top:16px}
+    
+    .auth-page{padding:24px 12px}
+    .auth-card{padding:24px 18px;border-radius:12px}
+    .auth-card h2{font-size:22px}
+    .auth-card .auth-sub{font-size:13px;margin-bottom:20px}
+    .auth-field{margin-bottom:14px}
+    .auth-field label{font-size:10px;margin-bottom:4px}
+    .auth-field input{padding:11px 12px;font-size:14px}
+    .auth-forgot{font-size:11px;margin-bottom:16px}
+    .auth-divider{font-size:11px;margin:14px 0}
+    .auth-social-btn{padding:10px;font-size:12px}
+    .auth-footer{font-size:12px;margin-top:16px}
+    .auth-error{font-size:11px;padding:8px 12px}
+    
+    .profile-page{padding:24px 12px}
+    .profile-card{padding:24px 18px;border-radius:12px}
+    .profile-header{gap:14px;margin-bottom:20px;padding-bottom:16px}
+    .profile-avatar-lg{width:48px;height:48px;font-size:18px}
+    .profile-info h2{font-size:18px}
+    .profile-info p{font-size:11px}
+    .profile-form{gap:12px}
+    .profile-form label{font-size:11px;margin-bottom:3px}
+    .profile-form input,
+    .profile-form textarea{padding:11px 12px;font-size:14px}
+    .profile-actions{gap:8px}
+    
+    .compare-section{padding:36px 0}
+    .compare-section h2{font-size:20px}
+    .compare-section .compare-sub{font-size:13px;margin-bottom:20px}
+    .compare-table th,.compare-table td{padding:10px 12px;font-size:12px}
+    .compare-table .plan-header{font-size:13px}
+    .compare-table .plan-price{font-size:11px}
+    .compare-table .cat-row td{padding:8px 12px;font-size:11px}
+    .compare-table .popular-badge{font-size:9px;padding:2px 8px}
+    
+    .pricing-cta-section{padding:36px 0}
+    .pricing-cta-card{padding:28px 20px;border-radius:12px}
+    .pricing-cta-card h3{font-size:20px}
+    .pricing-cta-card p{font-size:13px}
+    
+    .toast-container{left:12px;right:12px;bottom:12px}
+    .toast{max-width:calc(100vw - 24px);font-size:12px;padding:10px 14px;border-radius:8px}
   }
 
   /* Touch-friendly improvements */
@@ -595,116 +1123,6 @@
     .feature-card,.pricing-card,.service-card,.product-feature,.company-value,.team-card,.contact-item{touch-action:manipulation}
     nav a{padding:8px 0}
     .footer-col a{padding:8px 0}
-  }
-
-  /* Mobile-specific centering fixes */
-  @media(max-width:1023px){
-    /* Ensure all grids use proper width constraints */
-    .features-grid,
-    .pricing-grid,
-    .services-grid,
-    .product-features-grid,
-    .company-values,
-    .team-grid,
-    .tools-grid {
-      width: calc(100% + 0px);
-      margin-left: 0;
-      margin-right: 0;
-    }
-    
-    /* Fix showcase grid alignment */
-    .showcase-grid {
-      gap: 32px;
-    }
-    
-    /* Ensure cards don't overflow */
-    .feature-card,
-    .pricing-card,
-    .service-card,
-    .product-feature,
-    .tool-card,
-    .company-value,
-    .team-card {
-      max-width: 100%;
-      overflow: hidden;
-    }
-  }
-
-  @media(max-width:767px){
-    /* Tighter spacing for mobile */
-    .container { padding: 0 16px; }
-    
-    /* Stack stats vertically with proper centering */
-    .hero-stats {
-      align-items: center;
-      text-align: center;
-    }
-    
-    .hero-stat {
-      flex: 0 0 auto;
-    }
-    
-    /* Ensure contact items stack nicely */
-    .contact-item {
-      justify-content: flex-start;
-    }
-    
-    /* Footer bottom stacking */
-    .footer-bottom {
-      text-align: center;
-    }
-    
-    /* Testimonial adjustments */
-    .test-person {
-      align-items: flex-start;
-    }
-    
-    /* Form full width */
-    .form-group input,
-    .form-group textarea,
-    .form-group select,
-    .auth-field input,
-    .membership-input,
-    .profile-form input,
-    .profile-form textarea {
-      font-size: 16px; /* Prevent iOS zoom */
-    }
-  }
-
-  @media(max-width:479px){
-    /* Extra small screens */
-    .container { 
-      padding: 0 12px; 
-    }
-    
-    header {
-      padding: 10px 12px;
-    }
-    
-    /* Reduce padding inside cards for very small screens */
-    .feature-card,
-    .pricing-card,
-    .service-card,
-    .product-feature {
-      padding: 20px 16px;
-    }
-    
-    .tool-card .tool-header,
-    .tool-card .tool-body {
-      padding: 16px;
-    }
-    
-    /* Smaller headings */
-    .page-hero h1,
-    .pricing-page-hero h1 {
-      font-size: 28px;
-      line-height: 34px;
-    }
-    
-    .section-title {
-      font-size: 22px;
-      line-height: 30px;
-    }
   }
 
   /* Landscape phone fixes */
@@ -721,6 +1139,12 @@
       max-height: 90vh;
       overflow-y: auto;
     }
+  }
+
+  /* Extra small height devices */
+  @media(max-height:420px){
+    .auth-page,.profile-page{padding:16px 12px;align-items:flex-start;padding-top:40px}
+    .auth-card,.profile-card{padding:20px 16px}
   }
 </style>
 </head>
@@ -1454,7 +1878,7 @@ function renderProduct(el) {
       </div>
 
       <div style="text-align:center;margin-top:48px" class="animate-on-scroll">
-        <button class="btn-primary" onclick="showToast('🎉 Downloading starter kit...','success')">${icons.zap} Get Starter  Kit</button>
+        <button class="btn-primary" onclick="showToast('🎉 Downloading starter kit...','success')">${icons.zap} Get Starter Kit</button>
       </div>
     </div>
   </section>
