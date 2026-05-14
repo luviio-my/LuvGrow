@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LuvGrow — Design System for Vibe Coders</title>
+<link rel="icon" type="image/png" href="https://images.luviio.com/green-luviio-favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -90,8 +91,7 @@
   header.scrolled{box-shadow:0 4px 20px rgba(0,0,0,0.06);backdrop-filter:blur(10px);background:rgba(245,245,240,0.92)}
   .logo{font-family:"Space Mono",monospace;font-weight:700;font-size:20px;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px;transition:transform 0.3s;white-space:nowrap}
   .logo:hover{transform:scale(1.02)}
-  .logo-dot{width:10px;height:10px;background:var(--primary);border-radius:50%;display:inline-block;animation:pulse-dot 2s ease-in-out infinite;flex-shrink:0}
-  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+  .logo-img{height:32px;width:auto;border-radius:6px;object-fit:contain;flex-shrink:0}
   nav{display:flex;gap:20px;align-items:center;flex-wrap:nowrap}
   nav a{font-size:14px;font-weight:500;color:var(--text);text-decoration:none;transition:color .2s;position:relative;padding:4px 0;white-space:nowrap}
   nav a:hover{color:var(--primary)}
@@ -163,7 +163,7 @@
 
   /* SHOWCASE / MEMBERSHIP SECTION */
   .showcase{background:linear-gradient(180deg,#EDEDE8 0%,#F5F5F0 100%);border-top:1px solid var(--warm-light);border-bottom:1px solid var(--warm-light);position:relative;overflow:hidden;width:100%}
-  .showcase::before{content:'';position:absolute;top:0;left:0;right:0;height:200px;background:radial-gradient(ellipse at center top, rgba(93,134,108,0.06) 0%, transparent 70%);pointer-events:none}
+  .showcase::before{content:'';position:absolute;top:0;left:0;right:0;height:200px;background:radial-gradient(ellipse at center top, rgba(93,134,108,0.06) 0%,transparent 70%);pointer-events:none}
   .showcase-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;width:100%}
   .showcase-left h2{font-size:52px;font-weight:900;line-height:57.2px;color:var(--text);margin-bottom:18px;word-wrap:break-word}
   .showcase-left h2 .accent{color:var(--primary)}
@@ -257,7 +257,7 @@
   /* ========== TESTIMONIALS SECTION ========== */
   .testimonials-wrap{max-width:1180px;margin:0 auto;padding:64px 24px 72px;width:100%;box-sizing:border-box}
   .test-section{background:linear-gradient(180deg,#f5f6f7 0%,#f0f0eb 100%);position:relative;overflow:hidden;width:100%}
-  .test-section::before{content:'';position:absolute;top:0;left:0;right:0;height:300px;background:radial-gradient(ellipse at center, rgba(93,134,108,0.04) 0%, transparent 70%);pointer-events:none}
+  .test-section::before{content:'';position:absolute;top:0;left:0;right:0;height:300px;background:radial-gradient(ellipse at center, rgba(93,134,108,0.04) 0%,transparent 70%);pointer-events:none}
   .test-eyebrow{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:0;flex-wrap:wrap}
   .test-corner{width:18px;height:18px;transition:transform .3s;flex-shrink:0}
   .test-corner-left{border-top:2px solid #e64b3c;border-left:2px solid #e64b3c;border-right:0;border-bottom:0}
@@ -479,7 +479,7 @@
   .contact-item-icon{width:44px;height:44px;background:var(--primary-tint);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0}
   .contact-item-text strong{display:block;font-size:14px;color:var(--text);margin-bottom:2px}
   .contact-item-text span{font-size:13px;color:#8B8B7A}
-  .contact-form-card{background:#fff;border:2px solid var(--text);border-radius:var(--radius-lg);box-shadow:var(--shadow-btn);padding:36px;transition:all .3px;width:100%;box-sizing:border-box}
+  .contact-form-card{background:#fff;border:2px solid var(--text);border-radius:var(--radius-lg);box-shadow:var(--shadow-btn);padding:36px;transition:all .3s;width:100%;box-sizing:border-box}
   .contact-form-card:hover{box-shadow:var(--shadow-btn-hover);transform:translate(-2px,-2px)}
   .form-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   .form-group{margin-bottom:20px}
@@ -637,7 +637,7 @@
     .container{padding:0 20px}
     header{padding:14px 20px}
     .logo{font-size:17px}
-    .logo-dot{width:8px;height:8px}
+    .logo-img{height:28px}
     
     /* Hero compact */
     .hero{padding:60px 0 48px}
@@ -884,6 +884,7 @@
     .container{padding:0 16px}
     header{padding:12px 16px}
     .logo{font-size:15px}
+    .logo-img{height:26px}
     .hamburger{padding:6px}
     
     .hero{padding:48px 0 40px}
@@ -1246,7 +1247,7 @@
 
 <!-- HEADER -->
 <header id="mainHeader">
-  <a href="#/" class="logo"><span class="logo-dot"></span>LuvGrow</a>
+  <a href="#/" class="logo"><img src="https://images.luviio.com/green-luviio-favicon.png" alt="LuvGrow Logo" class="logo-img"></a>
   <nav id="mainNav">
     <a href="#/" class="nav-link">Home</a>
     <a href="#/product" class="nav-link">Product</a>
@@ -1273,6 +1274,7 @@
     <a href="#/about" onclick="toggleMobileNav()" style="font-size:16px">About</a>
     <a href="#/terms" onclick="toggleMobileNav()" style="font-size:16px">Terms</a>
     <a href="#/policy" onclick="toggleMobileNav()" style="font-size:16px">Privacy Policy</a>
+    <a href="#/contact" onclick="toggleMobileNav()" style="font-size:16px">Contact Us</a>
   </div>
 </div>
 
@@ -1297,12 +1299,37 @@ function navigate(route) {
   window.location.hash = route;
 }
 
+// ===== PAGE TITLES FOR SEO =====
+const pageTitles = {
+  '/': 'LuvGrow — Design System for Vibe Coders',
+  '/home': 'LuvGrow — Design System for Vibe Coders',
+  '/product': 'Product & Components · Luviio',
+  '/services': 'Our Services · Luviio',
+  '/pricing': 'Pricing & Plans · Luviio',
+  '/company': 'About Our Company · Luviio',
+  '/about': 'About LuvGrow · Luviio',
+  '/terms': 'Terms of Service · Luviio',
+  '/policy': 'Privacy Policy · Luviio',
+  '/login': 'Sign In · Luviio',
+  '/signup': 'Create Account · Luviio',
+  '/profile': 'My Profile · Luviio',
+  '/contact': 'Contact Us · Luviio'
+};
+
+function setPageTitle(route) {
+  const title = pageTitles[route] || 'LuvGrow — Design System for Vibe Coders';
+  document.title = title;
+}
+
 function router() {
   const route = getRoute();
   const app = document.getElementById('app');
   const header = document.getElementById('mainHeader');
   const authBtn = document.getElementById('authBtn');
   const navLinks = document.querySelectorAll('#mainNav .nav-link');
+
+  // Set page title for SEO
+  setPageTitle(route);
 
   // Update auth button
   if (isLoggedIn) {
@@ -1335,6 +1362,7 @@ function router() {
     case '/policy': renderPolicy(app); break;
     case '/login': renderLogin(app); break;
     case '/signup': renderSignup(app); break;
+    case '/contact': renderContact(app); break;
     case '/profile':
       if (!isLoggedIn) { navigate('#/login'); return; }
       renderProfile(app); break;
@@ -1446,10 +1474,10 @@ const standardFooter = `
 <footer>
   <div class="container">
     <div class="footer-grid">
-      <div class="footer-brand"><a href="#/" class="logo"><span class="logo-dot"></span>LuvGrow</a><p>A bold design system for creative technologists. Built with earthy warmth and intentional craft.</p></div>
+      <div class="footer-brand"><a href="#/" class="logo"><img src="https://images.luviio.com/green-luviio-favicon.png" alt="LuvGrow" style="height:28px;width:auto;border-radius:6px"></a><p>A bold design system for creative technologists. Built with earthy warmth and intentional craft.</p></div>
       <div class="footer-col"><h4>Product</h4><a href="#/product">Components</a><a href="#/product">Tokens</a><a href="#/product">Templates</a><a href="#/product">Changelog</a></div>
       <div class="footer-col"><h4>Resources</h4><a href="#/company">Documentation</a><a href="#/company">Guides</a><a href="#/company">Blog</a><a href="#/company">Community</a></div>
-      <div class="footer-col"><h4>Company</h4><a href="#/about">About</a><a href="#/company">Careers</a><a href="#/pricing">Pricing</a><a href="#/terms">Terms</a><a href="#/policy">Privacy Policy</a></div>
+      <div class="footer-col"><h4>Company</h4><a href="#/about">About</a><a href="#/company">Careers</a><a href="#/pricing">Pricing</a><a href="#/terms">Terms</a><a href="#/policy">Privacy Policy</a><a href="#/contact">Contact Us</a></div>
     </div>
     <div class="footer-bottom">
       <p>&copy; 2025 LuvGrow. All rights reserved.</p>
@@ -1747,7 +1775,7 @@ function renderHome(el) {
               <div class="contact-item-icon">${icons.mail}</div>
               <div class="contact-item-text">
                 <strong>Email Us</strong>
-                <span>hello@luvgrow.com</span>
+                <span>hello@luviio.com</span>
               </div>
             </div>
             <div class="contact-item">
@@ -2289,7 +2317,7 @@ function renderServices(el) {
       <div class="cta-card animate-on-scroll">
         <h2>Ready to start your <span class="accent">project</span>?</h2>
         <p>Tell us about your vision and let's build something extraordinary together.</p>
-        <button class="btn-primary" onclick="navigate('#/')">${icons.send} Get In Touch</button>
+        <button class="btn-primary" onclick="navigate('#/contact')">${icons.send} Get In Touch</button>
       </div>
     </div>
   </section>
@@ -2414,7 +2442,7 @@ function renderAbout(el) {
         </ul>
         
         <h2>Get In Touch</h2>
-        <p>Ready to start your next project? We'd love to hear from you. Reach out via our <a href="#/contact">contact form</a> or email us directly at <a href="mailto:hello@luvgrow.com">hello@luvgrow.com</a>.</p>
+        <p>Ready to start your next project? We'd love to hear from you. Reach out via our <a href="#/contact">contact form</a> or email us directly at <a href="mailto:hello@luviio.com">hello@luviio.com</a>.</p>
         
         <div class="last-updated">Last updated: January 2025</div>
       </div>
@@ -2600,7 +2628,7 @@ function renderLogin(el) {
   el.innerHTML = `
   <div class="auth-page">
     <div class="auth-card">
-      <a href="#/" class="logo" style="justify-content:center;margin-bottom:28px"><span class="logo-dot"></span>LuvGrow</a>
+      <a href="#/" class="logo" style="justify-content:center;margin-bottom:28px"><img src="https://images.luviio.com/green-luviio-favicon.png" alt="LuvGrow" style="height:32px;width:auto;border-radius:6px"></a>
       <h2>Welcome back</h2>
       <p class="auth-sub">Sign in to your account to continue</p>
       <div class="auth-error" id="loginError">Invalid email or password. Please try again.</div>
@@ -2645,7 +2673,7 @@ function renderSignup(el) {
   el.innerHTML = `
   <div class="auth-page">
     <div class="auth-card">
-      <a href="#/" class="logo" style="justify-content:center;margin-bottom:28px"><span class="logo-dot"></span>LuvGrow</a>
+      <a href="#/" class="logo" style="justify-content:center;margin-bottom:28px"><img src="https://images.luviio.com/green-luviio-favicon.png" alt="LuvGrow" style="height:32px;width:auto;border-radius:6px"></a>
       <h2>Create account</h2>
       <p class="auth-sub">Start building beautiful interfaces today</p>
       <div class="auth-error" id="signupError">Please fill in all fields correctly.</div>
@@ -2773,6 +2801,148 @@ function handleLogout() {
   currentUser = { name: '', email: '', initials: '', bio: '' };
   showToast('👋 Logged out successfully', 'success');
   navigate('#/');
+}
+
+// ===== CONTACT PAGE =====
+function renderContact(el) {
+  el.innerHTML = `
+  <div class="page-hero">
+    <div class="container">
+      <div class="section-label animate-on-scroll">Contact Us</div>
+      <h1 class="animate-on-scroll animate-delay-1">Get in <span class="accent">touch</span></h1>
+      <p class="animate-on-scroll animate-delay-2">Have a question or want to start a project? We'd love to hear from you.</p>
+    </div>
+  </div>
+  
+  <section class="contact-section" style="background:var(--bg);border:none;padding:0 0 80px">
+    <div class="container">
+      <div class="contact-grid">
+        <div class="contact-info animate-on-scroll">
+          <h2>Let's build something<br><span class="accent">amazing together</span></h2>
+          <p>Whether you have a project in mind, need a quote, or just want to say hello — we're here for you. Reach out and let's make something great happen.</p>
+          
+          <div class="contact-details">
+            <div class="contact-item">
+              <div class="contact-item-icon">${icons.mail}</div>
+              <div class="contact-item-text">
+                <strong>Email Us</strong>
+                <span>hello@luviio.com</span>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-item-icon">${icons.phone}</div>
+              <div class="contact-item-text">
+                <strong>Call Us</strong>
+                <span>+60 12 345 6789</span>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-item-icon">${icons.mapPin}</div>
+              <div class="contact-item-text">
+                <strong>Visit Us</strong>
+                <span>Kuala Lumpur, Malaysia</span>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-item-icon">${icons.clock}</div>
+              <div class="contact-item-text">
+                <strong>Working Hours</strong>
+                <span>Mon - Fri: 9AM - 6PM (MYT)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="contact-form-card animate-on-scroll animate-delay-2">
+          <form id="contactFormPage" onsubmit="handleContactPageSubmit(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>FIRST NAME *</label>
+                <input type="text" name="firstName" required placeholder="John">
+              </div>
+              <div class="form-group">
+                <label>LAST NAME *</label>
+                <input type="text" name="lastName" required placeholder="Doe">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>EMAIL ADDRESS *</label>
+              <input type="email" name="email" required placeholder="john@example.com">
+            </div>
+            <div class="form-group">
+              <label>PHONE NUMBER</label>
+              <input type="tel" name="phone" placeholder="+60 12 345 6789">
+            </div>
+            <div class="form-group">
+              <label>SERVICE INTERESTED IN *</label>
+              <select name="service" required>
+                <option value="">Select a service...</option>
+                <option value="web-design">Website Design</option>
+                <option value="web-dev">Web Development</option>
+                <option value="mobile">Mobile Apps</option>
+                <option value="it-support">IT Support</option>
+                <option value="other">Other / Not Sure</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tell us about your project *</label>
+              <textarea name="message" required placeholder="Describe your project goals, timeline, and any specific requirements..."></textarea>
+            </div>
+            <button type="submit" class="btn-primary" style="width:100%;justify-content:center;padding:14px 22px;font-size:15px">${icons.send} Send Message</button>
+            <div class="form-success" id="contactPageSuccess">✅ Thank you! Your message has been sent successfully. We'll get back to you within 24 hours.</div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Map / Location Section -->
+  <section style="padding:0 0 80px">
+    <div class="container">
+      <div style="max-width:800px;margin:0 auto;text-align:center" class="animate-on-scroll">
+        <h2 style="font-size:36px;font-weight:900;margin-bottom:16px">Visit our office</h2>
+        <p style="font-size:17px;color:#5C5C4F;margin-bottom:32px">Come say hi! We're located in the heart of Kuala Lumpur.</p>
+        <div style="background:var(--warm-light);border-radius:var(--radius-lg);padding:40px;border:2px solid var(--warm-mid)">
+          <div style="font-family:'Space Mono',monospace;font-size:14px;color:var(--text);line-height:2">
+            📍 LuvGrow Sdn Bhd<br>
+            Level 12, Menara KL<br>
+            Jalan Sultan Ismail<br>
+            50250 Kuala Lumpur<br>
+            Malaysia
+          </div>
+          <div style="margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+            <a href="https://maps.google.com/?q=Kuala+Lumpur,Malaysia" target="_blank" class="btn-secondary" style="font-size:13px">${icons.mapPin} Open in Maps</a>
+            <a href="https://wa.me/60123456789" target="_blank" class="btn-primary" style="font-size:13px">${icons.phone} WhatsApp Us</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  ${standardFooter}`;
+}
+
+function handleContactPageSubmit(e) {
+  e.preventDefault();
+  const form = document.getElementById('contactFormPage');
+  const success = document.getElementById('contactPageSuccess');
+  
+  const btn = form.querySelector('button[type="submit"]');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = 'Sending...';
+  btn.disabled = true;
+  
+  setTimeout(() => {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    form.reset();
+    if (success) success.classList.add('show');
+    showToast('📧 Message sent successfully!', 'success');
+    
+    setTimeout(() => {
+      if (success) success.classList.remove('show');
+    }, 5000);
+  }, 1500);
 }
 </script>
 
