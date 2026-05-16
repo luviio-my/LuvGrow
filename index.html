@@ -1978,13 +1978,17 @@ auth.getRedirectResult()
       }
     }
   })
-  .catch((err) => {
-    console.error(err); // Keep for debugging
-    const friendlyMsg = getFriendlyErrorMessage(err);
-    if (friendlyMsg) {
+.catch((err) => {
+      console.error(err); // Keep for debugging only
+      const friendlyMsg = getFriendlyErrorMessage(err);
+      if (error) { 
+        error.innerHTML = friendlyMsg; // Use innerHTML to support links
+        error.classList.add('show'); 
+      }
       showToast(friendlyMsg, 'error');
-    }
-  });
+      btn.innerHTML = 'Sign In';
+      btn.disabled = false;
+    });
 
 // ===== ROUTER (Clean URLs - History API) =====
 const basePath = ''; // Change to '/subfolder/' if hosted in subdirectory
@@ -3435,10 +3439,14 @@ function handleEmailSignup() {
       showToast('🎉 Account created! Welcome, ' + name.value.split(' ')[0] + '!', 'success');
       navigate('/profile');
     })
-    .catch((err) => {
+.catch((err) => {
       console.error(err);
-      if (error) { error.textContent = err.message || 'Signup failed.'; error.classList.add('show'); }
-      showToast(err.message || 'Signup failed', 'error');
+      const friendlyMsg = getFriendlyErrorMessage(err);
+      if (error) { 
+        error.innerHTML = friendlyMsg;
+        error.classList.add('show'); 
+      }
+      showToast(friendlyMsg, 'error');
       btn.innerHTML = 'Create Account';
       btn.disabled = false;
     });
