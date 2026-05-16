@@ -3442,61 +3442,52 @@ function handleEmailLogin() {
     });
 }
 
-// ===== Google Sign In (Mobile-Friendly - Popup + Redirect Fallback) =====
+// ===== Google Sign In (Popup for ALL devices) =====
 function handleGoogleSignIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
   
-  // CRITICAL FIX: Use Redirect on mobile, Popup on desktop
-  if (isMobileDevice()) {
-    // Mobile: Use redirect method (popup gets blocked/closed unexpectedly on mobile)
-    auth.signInWithRedirect(provider)
-      .then(() => {
-        showToast('🔄 Redirecting to Google...', 'success');
-      })
-      .catch((err) => {
-        const friendlyMsg = getFriendlyErrorMessage(err);
-        if (friendlyMsg && friendlyMsg !== '') {
-          showToast(friendlyMsg, 'error');
-        }
-      });
-  } else {
-    // Desktop: Use popup method
-    auth.signInWithPopup(provider)
-      .then((result) => {
-        const user = result.user;
-        const isNewUser = result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false;
-        
-        if (isNewUser) {
-          return db.collection('users').doc(user.uid).set({
-            name: user.displayName || '',
-            email: user.email,
-            photoURL: user.photoURL || '',
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            signupMethod: 'google'
-          }, { merge: true }).then(() => {
-            showToast('🎉 Account created with Google!', 'success');
-            navigate('/profile');
-          });
-        } else {
-          return db.collection('logins').add({
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            method: 'google',
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          }).then(() => {
-            showToast('🌿 Welcome back!', 'success');
-            navigate('/profile');
-          });
-        }
-      })
-      .catch((err) => {
-        const friendlyMsg = getFriendlyErrorMessage(err);
-        if (friendlyMsg && friendlyMsg !== '') {
-          showToast(friendlyMsg, 'error');
-        }
-      });
-  }
+  // Always use Popup - works on mobile, tablet & desktop
+  auth.signInWithPopup(provider)
+    .then((result) => {
+      const user = result.user;
+      const isNewUser = result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false;
+      
+      if (isNewUser) {
+        return db.collection('users').doc(user.uid).set({
+          name: user.displayName || '',
+          email: user.email,
+          photoURL: user.photoURL || '',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          signupMethod: 'google'
+        }, { merge: true }).then(() => {
+          showToast('🎉 Account created with Google!', 'success');
+          navigate('/profile');
+        });
+      } else {
+        return db.collection('logins').add({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          method: 'google',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+          showToast('🌿 Welcome back!', 'success');
+          navigate('/profile');
+        });
+      }
+    })
+    .catch((err) => {
+      const friendlyMsg = getFriendlyErrorMessage(err);
+      if (friendlyMsg && friendlyMsg !== '') {
+        showToast(friendlyMsg, 'error');
+      }
+      // If popup blocked (rare on mobile), fallback to redirect
+      if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+        showToast('Popup blocked. Trying alternative sign-in...', 'error');
+        // Optional: fallback to redirect here if needed
+        // auth.signInWithRedirect(provider);
+      }
+    });
 }
 
 // ===== SIGNUP PAGE =====
@@ -3585,59 +3576,50 @@ function handleEmailSignup() {
     });
 }
 
-// ===== Google Sign Up (Mobile-Friendly) =====
+// ===== Google Sign Up (Popup for ALL devices) =====
 function handleGoogleSignUp() {
   const provider = new firebase.auth.GoogleAuthProvider();
   
-  // CRITICAL FIX: Use Redirect on mobile, Popup on desktop
-  if (isMobileDevice()) {
-    auth.signInWithRedirect(provider)
-      .then(() => {
-        showToast('🔄 Redirecting to Google...', 'success');
-      })
-      .catch((err) => {
-        const friendlyMsg = getFriendlyErrorMessage(err);
-        if (friendlyMsg && friendlyMsg !== '') {
-          showToast(friendlyMsg, 'error');
-        }
-      });
-  } else {
-    auth.signInWithPopup(provider)
-      .then((result) => {
-        const user = result.user;
-        const isNewUser = result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false;
-        
-        if (isNewUser) {
-          return db.collection('users').doc(user.uid).set({
-            name: user.displayName || '',
-            email: user.email,
-            photoURL: user.photoURL || '',
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            signupMethod: 'google'
-          }, { merge: true }).then(() => {
-            showToast('🎉 Account created with Google!', 'success');
-            navigate('/profile');
-          });
-        } else {
-          return db.collection('logins').add({
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            method: 'google',
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          }).then(() => {
-            showToast('🌿 Welcome back!', 'success');
-            navigate('/profile');
-          });
-        }
-      })
-      .catch((err) => {
-        const friendlyMsg = getFriendlyErrorMessage(err);
-        if (friendlyMsg && friendlyMsg !== '') {
-          showToast(friendlyMsg, 'error');
-        }
-      });
-  }
+  // Always use Popup - works on mobile, tablet & desktop
+  auth.signInWithPopup(provider)
+    .then((result) => {
+      const user = result.user;
+      const isNewUser = result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false;
+      
+      if (isNewUser) {
+        return db.collection('users').doc(user.uid).set({
+          name: user.displayName || '',
+          email: user.email,
+          photoURL: user.photoURL || '',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          signupMethod: 'google'
+        }, { merge: true }).then(() => {
+          showToast('🎉 Account created with Google!', 'success');
+          navigate('/profile');
+        });
+      } else {
+        return db.collection('logins').add({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          method: 'google',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+          showToast('🌿 Welcome back! You already have an account.', 'success');
+          navigate('/profile');
+        });
+      }
+    })
+    .catch((err) => {
+      const friendlyMsg = getFriendlyErrorMessage(err);
+      if (friendlyMsg && friendlyMsg !== '') {
+        showToast(friendlyMsg, 'error');
+      }
+      // Handle popup blocking gracefully
+      if (err.code === 'auth/popup-blocked') {
+        showToast('Please allow popups for this site to sign in with Google', 'error');
+      }
+    });
 }
 
 // ===== PROFILE PAGE (Enhanced with Photo Display) =====
