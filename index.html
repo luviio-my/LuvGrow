@@ -1914,9 +1914,14 @@ function getFriendlyErrorMessage(error) {
 
 // ===== AUTH STATE LISTENER =====
 auth.onAuthStateChanged(async (user) => {
-  authInitialized = true;
+  authInitialized = true;  // Mark as ready
+  
+  const currentRoute = getRoute();
   
   if (user) {
+    // ==========================================
+    // USER IS LOGGED IN - Set all state immediately
+    // ==========================================
     isLoggedIn = true;
     currentUser.uid = user.uid;
     currentUser.email = user.email;
@@ -1947,12 +1952,37 @@ auth.onAuthStateChanged(async (user) => {
       // Silently handle fetch errors
     }
     
+    // Update Header Button IMMEDIATELY (Login → My Profile)
     updateAuthUI();
-    if (getRoute() === '/profile') router();
+    
+    // ==========================================
+    // CRITICAL: Re-render if on a protected route
+    // This handles the refresh scenario where router showed loading skeleton
+    // ==========================================
+    if (PROTECTED_ROUTES.includes(currentRoute)) {
+      router();  // This will now pass the auth check and render real content
+    }
+    
+    // Also handle edge case: if user was on login page but is now logged in
+    if (currentRoute === '/login' || currentRoute === '/signup') {
+      // Optional: redirect to profile if they land on login while logged in
+      // Uncomment next line if you want this behavior:
+      // navigate('/profile'); 
+    }
+    
   } else {
+    // ==========================================
+    // NO USER - Reset everything
+    // ==========================================
     isLoggedIn = false;
     currentUser = { name: '', email: '', initials: '', bio: '', uid: null, photoURL: '' };
     updateAuthUI();
+    
+    // If on protected route and no user, router() will handle redirect
+    // (because authInitialized is now true, the guard in router will trigger)
+    if (PROTECTED_ROUTES.includes(currentRoute)) {
+      router();  // Triggers the redirect logic in router()
+    }
   }
 });
 
@@ -2056,6 +2086,9 @@ const pageTitles = {
   '/checkout': 'Complete Purchase · Luviio'
 };
 
+// Protected routes that require authentication
+const PROTECTED_ROUTES = ['/profile', '/checkout'];
+
 function setPageTitle(route) {
   document.title = pageTitles[route] || 'LuvGrow — Design System for Vibe Coders';
 }
@@ -2072,6 +2105,56 @@ function router() {
     link.style.color = (href === '#' + route || (route === '/' && href === '/')) ? 'var(--primary)' : '';
   });
 
+  // ==========================================
+  // AUTH GUARD: Handle Protected Routes
+  // ==========================================
+  
+  // CASE A: Protected route accessed BEFORE auth is initialized
+  // Show elegant loading skeleton to prevent flash of wrong content
+  if (PROTECTED_ROUTES.includes(route) && !authInitialized) {
+    app.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 73px);background:var(--bg);padding:20px">
+        <div style="text-align:center;width:100%;max-width:320px">
+          <div class="skeleton" style="width:64px;height:64px;border-radius:50%;margin:0 auto 20px;border-radius:50%"></div>
+          <div class="skeleton" style="width:60%;height:20px;margin:0 auto 12px;border-radius:10px"></div>
+          <div class="skeleton" style="width:40%;height:14px;margin:0 auto;border-radius:8px"></div>
+          <p style="font-size:13px;color:#8B8B7A;margin-top:24px;font-family:'Space Mono',monospace;letter-spacing:0.05em">VERIFYING SESSION...</p>
+        </div>
+      </div>
+    `;
+    // DON'T return yet - let auth listener call router() again when ready
+    // This prevents the login form from ever flashing
+    return;
+  }
+
+  // CASE B: Protected route accessed AFTER auth initialized, but NOT logged in
+  // Force redirect to login immediately (replace history to prevent back-button return)
+  if (PROTECTED_ROUTES.includes(route) && authInitialized && (!isLoggedIn || !currentUser.uid)) {
+    // Replace current history entry so back button doesn't return to protected page
+    window.history.replaceState({ route: '/login' }, '', basePath + '/login');
+    
+    // Show toast explaining why
+    if (route === '/profile') {
+      showToast('🔒 Please sign in to view your profile', 'error');
+    } else if (route === '/checkout') {
+      showToast('🔒 Please sign in to complete your purchase', 'error');
+    }
+    
+    // Navigate to login after a tiny delay to allow state update
+    setTimeout(() => navigate('/login'), 100);
+    return;
+  }
+
+  // CASE C: Checkout specific validation (plan selection)
+  if (route === '/checkout' && selectedPlan && !plans[selectedPlan]) {
+    navigate('/pricing');
+    return;
+  }
+
+  // ==========================================
+  // ROUTE RENDERING (Only reached if authorized or public)
+  // ==========================================
+  
   switch (route) {
     case '/': case '/home': renderHome(app); break;
     case '/product': renderProduct(app); break;
@@ -2081,18 +2164,18 @@ function router() {
     case '/about': renderAbout(app); break;
     case '/terms': renderTerms(app); break;
     case '/policy': renderPolicy(app); break;
-    case '/login': renderLogin(app); break;
+    case '/login': 
+      // If already logged in and hit login page, send to profile
+      if (isLoggedIn && currentUser.uid) {
+        navigate('/profile');
+        return;
+      }
+      renderLogin(app); 
+      break;
     case '/signup': renderSignup(app); break;
     case '/contact': renderContact(app); break;
     case '/profile': renderProfile(app); break;
-    case '/checkout':
-      if (!selectedPlan) { navigate('/pricing'); return; }
-      if (!isLoggedIn && !currentUser.uid) { 
-        showToast('Please sign in to continue with your purchase', 'error');
-        setTimeout(() => navigate('/login'), 1000);
-        return; 
-      }
-      renderCheckout(app); break;
+    case '/checkout': renderCheckout(app); break;
     default: renderHome(app); break;
   }
 
@@ -2103,6 +2186,43 @@ function router() {
 }
 
 window.addEventListener('DOMContentLoaded', router);
+
+// ==========================================
+// INITIAL UI SYNC
+// Prevents "Login" button flash for returning users
+// by checking localStorage/session for cached auth hint
+// ==========================================
+(function() {
+  // Check if we have a recent Firebase auth token (indicates likely logged in)
+  const hasFirebaseToken = () => {
+    try {
+      // Firebase stores tokens in IndexedDB/localStorage
+      // This is a heuristic check
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.includes('firebase:authUser:')) {
+          return true;
+        }
+      }
+    } catch(e) {}
+    return false;
+  };
+
+  // If we detect a stored token, optimistically update UI before Firebase confirms
+  // This eliminates the 200ms "Login"→"My Profile" flicker on refresh
+  if (hasFirebaseToken()) {
+    const authBtn = document.getElementById('authBtn');
+    const mobileAuthLink = document.getElementById('mobileAuthLink');
+    if (authBtn) { 
+      authBtn.href = '/profile'; 
+      authBtn.textContent = 'My Profile'; 
+    }
+    if (mobileAuthLink) { 
+      mobileAuthLink.href = '/profile'; 
+      mobileAuthLink.textContent = 'My Profile'; 
+    }
+  }
+})();
 
 window.addEventListener('hashchange', () => {
   const hash = window.location.pathname.replace('#', '');
@@ -3640,27 +3760,39 @@ function handleGoogleSignUp() {
   }
 }
 
-// ===== PROFILE PAGE (Enhanced with Photo Display) =====
+// ===== PROFILE PAGE (Hardened - No Guest Access) =====
 function renderProfile(el) {
-  // Only show real user data, never demo data
-  if (!isLoggedIn || !currentUser.uid) {
-    el.innerHTML = `
-    <div class="profile-page">
-      <div class="profile-card">
-        <div style="text-align:center;padding:40px 20px">
-          <div style="width:80px;height:80px;background:var(--warm-light);border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--warm-mid)">
-            <i data-lucide="user" style="width:40px;height:40px"></i>
-          </div>
-          <h2 style="font-size:24px;font-weight:900;margin-bottom:8px">Not Signed In</h2>
-          <p style="color:#8B8B7A;margin-bottom:24px">Please sign in to view your profile</p>
-          <button class="btn-primary" style="width:100%;justify-content:center" onclick="navigate('/login')">${icons.logOut} Sign In to Continue</button>
-        </div>
-      </div>
-    </div>`;
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+  // ==========================================
+  // ABSOLUTE SECURITY CHECK
+  // If this function runs and user isn't valid, something went wrong.
+  // Force emergency redirect.
+  // ==========================================
+  if (!isLoggedIn || !currentUser.uid || !auth.currentUser) {
+    console.warn('[Security] Profile page accessed without valid session. Redirecting.');
+    
+    // Clear sensitive content immediately
+    el.innerHTML = '';
+    
+    // Force redirect using replaceState (prevents browser back-button bypass)
+    if (window.location.pathname !== '/login' && window.location.pathname !== basePath + '/login') {
+      window.history.replaceState({ route: '/login', forced: true }, '', basePath + '/login');
+      
+      // Immediate navigation
+      setTimeout(() => {
+        navigate('/login');
+      }, 10);
+    } else {
+      // Fallback: If stuck, render login directly
+      renderLogin(el);
+    }
     return;
   }
 
+  // ==========================================
+  // USER IS AUTHENTICATED - RENDER PROFILE IMMEDIATELY
+  // No login forms, no delays, no guest views
+  // ==========================================
+  
   const displayName = currentUser.name || 'User';
   const displayEmail = currentUser.email || '';
   const displayInitials = currentUser.initials || '?';
