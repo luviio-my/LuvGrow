@@ -1871,7 +1871,7 @@ function getFriendlyErrorMessage(error) {
   const message = error.message || '';
   
   // Firebase Auth Error Codes → User-Friendly Messages
-const errorMap = {
+  const errorMap = {
     'auth/invalid-credential': 'Incorrect email or password. Please use the correct account credentials, create an account if you don’t have one, or reset your password if you forgot it. For support, contact <a href="mailto:care@luviio.com" style="color:var(--primary);text-decoration:underline">care@luviio.com</a>.',
     'auth/user-not-found': 'No account found with this email address. Please check your spelling or <a href="/signup" style="color:var(--primary);text-decoration:underline">create an account</a>.',
     'auth/wrong-password': 'Incorrect password. Please try again or <a href="#" onclick="handleForgotPassword();return false" style="color:var(--primary);text-decoration:underline">reset your password</a>.',
@@ -1893,7 +1893,7 @@ const errorMap = {
     'auth/requires-recent-login': 'This operation requires recent authentication. Please sign in again.',
     'auth/tenant-id-mismatch': 'Configuration mismatch. Please contact support.',
     'auth/account-exists-with-different-credential': 'An account already exists with this email but different sign-in method. Try signing in with Google instead.'
-};
+  };
   
   // Return friendly message if found, otherwise generic message (never expose raw Firebase errors)
   if (errorMap[code]) {
@@ -3310,7 +3310,10 @@ function handleEmailLogin() {
   const error = document.getElementById('loginError');
   
   if (!email || !password || !email.value || !password.value) {
-    if (error) error.classList.add('show');
+    if (error) {
+      error.innerHTML = 'Please fill in all fields.';
+      error.classList.add('show');
+    }
     showToast('Please fill in all fields', 'error');
     return;
   }
@@ -3333,9 +3336,13 @@ function handleEmailLogin() {
       navigate('/profile');
     })
     .catch((err) => {
-      console.error(err);
-      if (error) { error.textContent = err.message || 'Invalid credentials.'; error.classList.add('show'); }
-      showToast(err.message || 'Login failed', 'error');
+      console.error(err); // Keep for debugging only
+      const friendlyMsg = getFriendlyErrorMessage(err);
+      if (error) { 
+        error.innerHTML = friendlyMsg; // Use innerHTML to support links
+        error.classList.add('show'); 
+      }
+      showToast(friendlyMsg, 'error');
       btn.innerHTML = 'Sign In';
       btn.disabled = false;
     });
