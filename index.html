@@ -1833,6 +1833,24 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+
+// ===== SUPPRESS FIREBASE CONSOLE WARNINGS =====
+const originalConsoleError = console.error;
+console.error = function(...args) {
+  const message = args.join(' ').toLowerCase();
+  if (
+    message.includes('firebase:') || 
+    message.includes('auth/') ||
+    message.includes('supplied auth credential') ||
+    message.includes('invalid-credential') ||
+    message.includes('malformed') ||
+    message.includes('expired')
+  ) {
+    return; // Silently swallow the error
+  }
+  originalConsoleError.apply(console, args);
+};
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 
