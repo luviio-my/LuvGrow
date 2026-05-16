@@ -1961,11 +1961,27 @@ function updateAuthUI() {
   const mobileAuthLink = document.getElementById('mobileAuthLink');
   
   if (isLoggedIn) {
-    if (authBtn) { authBtn.href = '/profile'; authBtn.textContent = 'My Profile'; }
-    if (mobileAuthLink) { mobileAuthLink.href = '/profile'; mobileAuthLink.textContent = 'My Profile'; }
+    // 👁️ COMPLETELY HIDE the Login button when user is logged in
+    if (authBtn) { 
+      authBtn.style.display = 'none'; 
+      // Optional: Also hide from mobile nav
+    }
+    if (mobileAuthLink) { 
+      mobileAuthLink.style.display = 'none'; 
+    }
   } else {
-    if (authBtn) { authBtn.href = '/login'; authBtn.textContent = 'Login'; }
-    if (mobileAuthLink) { mobileAuthLink.href = '/login'; mobileAuthLink.textContent = 'Login'; }
+    // Show login button only when NOT logged in
+    if (authBtn) { 
+      authBtn.style.display = ''; 
+      authBtn.style.display = 'inline-flex'; // Restore original display
+      authBtn.href = '/login'; 
+      authBtn.textContent = 'Login'; 
+    }
+    if (mobileAuthLink) { 
+      mobileAuthLink.style.display = ''; 
+      mobileAuthLink.href = '/login'; 
+      mobileAuthLink.textContent = 'Login'; 
+    }
   }
 }
 
@@ -2081,18 +2097,29 @@ function router() {
     case '/about': renderAbout(app); break;
     case '/terms': renderTerms(app); break;
     case '/policy': renderPolicy(app); break;
-    case '/login': renderLogin(app); break;
+    
+    // 🔒 LOGIN: If already logged in, skip login page entirely → go to profile
+    case '/login': 
+      if (isLoggedIn && currentUser.uid) { navigate('/profile'); return; }
+      renderLogin(app); 
+      break;
+    
     case '/signup': renderSignup(app); break;
     case '/contact': renderContact(app); break;
+    
+    // 🔒 PROFILE: Auth guard handled inside renderProfile()
     case '/profile': renderProfile(app); break;
+    
     case '/checkout':
       if (!selectedPlan) { navigate('/pricing'); return; }
-      if (!isLoggedIn && !currentUser.uid) { 
+      if (!isLoggedIn && !currentUser.uid && authInitialized) { 
         showToast('Please sign in to continue with your purchase', 'error');
-        setTimeout(() => navigate('/login'), 1000);
+        setTimeout(() => navigate('/login'), 800);
         return; 
       }
-      renderCheckout(app); break;
+      renderCheckout(app); 
+      break;
+      
     default: renderHome(app); break;
   }
 
@@ -3291,8 +3318,23 @@ function renderPolicy(el) {
   ${standardFooter}`;
 }
 
-// ===== LOGIN PAGE =====
+// ===== LOGIN PAGE — Hidden from Already-Logged-In Users =====
 function renderLogin(el) {
+  
+  // ✅ ALREADY LOGGED IN? → Redirect to profile instantly, NEVER show login form
+  if ((isLoggedIn && currentUser.uid) || (authInitialized && isLoggedIn)) {
+    navigate('/profile');
+    return;
+  }
+
+  // ⏳ If Firebase still loading, show brief loading state (optional safety net)
+  if (!authInitialized) {
+    el.innerHTML = `<div class="auth-page"><div class="auth-card"><div style="text-align:center;padding:40px"><div class="skeleton" style="width:60px;height:60px;border-radius:50%;margin:0 auto 16px"></div><p style="color:#8B8B7A;font-size:14px">Checking session...</p></div></div></div>`;
+    setTimeout(() => { if (authInitialized && isLoggedIn) navigate('/profile'); }, 300);
+    return;
+  }
+
+  // ❌ NOT LOGGED IN → Show login form
   el.innerHTML = `
   <div class="auth-page">
     <div class="auth-card" id="loginCard">
@@ -3622,27 +3664,38 @@ function handleGoogleSignUp() {
     });
 }
 
-// ===== PROFILE PAGE (Enhanced with Photo Display) =====
+// ===== PROFILE PAGE — Instant Display for Logged-In Users =====
 function renderProfile(el) {
-  // Only show real user data, never demo data
-  if (!isLoggedIn || !currentUser.uid) {
-    el.innerHTML = `
-    <div class="profile-page">
-      <div class="profile-card">
-        <div style="text-align:center;padding:40px 20px">
-          <div style="width:80px;height:80px;background:var(--warm-light);border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--warm-mid)">
-            <i data-lucide="user" style="width:40px;height:40px"></i>
-          </div>
-          <h2 style="font-size:24px;font-weight:900;margin-bottom:8px">Not Signed In</h2>
-          <p style="color:#8B8B7A;margin-bottom:24px">Please sign in to view your profile</p>
-          <button class="btn-primary" style="width:100%;justify-content:center" onclick="navigate('/login')">${icons.logOut} Sign In to Continue</button>
-        </div>
-      </div>
-    </div>`;
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+  
+  // ❌ NOT LOGGED IN + Firebase ready? → REDIRECT IMMEDIATELY to /login
+  if ((!isLoggedIn || !currentUser.uid) && authInitialized) {
+    navigate('/login');
     return;
   }
 
+  // ⏳ Still waiting for Firebase? → Show elegant loading skeleton
+  if (!authInitialized) {
+    el.innerHTML = `
+    <div class="profile-page">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 73px);gap:20px;padding:40px 20px">
+        <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--primary-tint),var(--warm-light));animation:pulse-ring 2s ease-in-out infinite"></div>
+        <div class="skeleton" style="width:180px;height:22px;border-radius:10px"></div>
+        <div class="skeleton" style="width:240px;height:14px;border-radius:8px"></div>
+        <p style="font-size:13px;color:#8B8B7A;margin-top:12px;font-family:'Space Mono',monospace;letter-spacing:0.05em">VERIFYING SESSION...</p>
+      </div>
+    </div>`;
+    
+    // Auto-re-render once Firebase finishes checking
+    const checkInterval = setInterval(() => {
+      if (authInitialized) {
+        clearInterval(checkInterval);
+        router(); // Force re-render now that we know auth status
+      }
+    }, 100);
+    return;
+  }
+
+  // ✅ LOGGED IN → SHOW PROFILE DATA INSTANTLY (no login form ever flashes)
   const displayName = currentUser.name || 'User';
   const displayEmail = currentUser.email || '';
   const displayInitials = currentUser.initials || '?';
