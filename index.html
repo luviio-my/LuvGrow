@@ -1847,6 +1847,55 @@ const plans = {
   proit: { name: 'Pro IT', price: '1,900 MYR/mo', priceNum: 1900, stripeUrl: 'https://buy.stripe.com/cNieV7f3ydL97Tgeve97G07' }
 };
 
+// ===== FRIENDLY ERROR MESSAGES =====
+function getFriendlyErrorMessage(error) {
+  const code = error.code || '';
+  const message = error.message || '';
+  
+  // Firebase Auth Error Codes → User-Friendly Messages
+  const errorMap = {
+    'auth/invalid-credential': 'Invalid email or password. Please check your credentials and try again.',
+    'auth/user-not-found': 'No account found with this email address.',
+    'auth/wrong-password': 'Incorrect password. Please try again.',
+    'auth/email-already-in-use': 'An account with this email already exists. Try signing in instead.',
+    'auth/weak-password': 'Password is too weak. Please use at least 8 characters with a mix of letters and numbers.',
+    'auth/invalid-email': 'Please enter a valid email address.',
+    'auth/too-many-requests': 'Too many failed attempts. Please wait a few minutes before trying again.',
+    'auth/network-request-failed': 'Network error. Please check your internet connection.',
+    'auth/popup-blocked': 'Popup was blocked by your browser. Please allow popups or try again.',
+    'auth/popup-closed-by-user': '', // Silent - user closed it intentionally
+    'auth/cancelled-popup-request': '', // Silent - cancelled by new request
+    'auth/operation-not-allowed': 'This sign-in method is not enabled. Please contact support.',
+    'auth/invalid-api-key': 'Configuration error. Please contact support.',
+    'auth/app-deleted': 'This application has been deleted. Please contact support.',
+    'auth/user-disabled': 'This account has been disabled. Please contact support.',
+    'auth/user-token-expired': 'Your session has expired. Please sign in again.',
+    'auth/web-storage-unsupported': 'Browser storage not supported. Please enable cookies/localStorage.',
+    'auth/unauthorized-domain': 'This domain is not authorized for OAuth operations.',
+    'auth/requires-recent-login': 'This operation requires recent authentication. Please sign in again.',
+    'auth/tenant-id-mismatch': 'Configuration mismatch. Please contact support.',
+    'auth/account-exists-with-different-credential': 'An account already exists with the same email but different sign-in method.'
+  };
+  
+  // Return friendly message if found, otherwise generic message (never expose raw Firebase errors)
+  if (errorMap[code]) {
+    return errorMap[code] || ''; // Return empty string for silent errors like popup-closed
+  }
+  
+  // Generic fallback (NEVER return raw Firebase message)
+  if (message.toLowerCase().includes('firebase')) {
+    return 'Something went wrong. Please try again.';
+  }
+  
+  // If it's a network-related message, be specific
+  if (code.includes('network') || code.includes('timeout') || code.includes('request-failed')) {
+    return 'Connection issue. Please check your internet and try again.';
+  }
+  
+  // Final catch-all
+  return 'An unexpected error occurred. Please try again later.';
+}
+
 // ===== AUTH STATE LISTENER =====
 auth.onAuthStateChanged((user) => {
   if (user) {
@@ -1912,10 +1961,10 @@ auth.getRedirectResult()
     }
   })
   .catch((err) => {
-    console.error(err);
-    if (err.code !== 'auth/cancelled-popup-request' && 
-        err.code !== 'auth/popup-closed-by-user') {
-      showToast(getFriendlyErrorMessage(err), 'error');
+    console.error(err); // Keep for debugging
+    const friendlyMsg = getFriendlyErrorMessage(err);
+    if (friendlyMsg) {
+      showToast(friendlyMsg, 'error');
     }
   });
 
@@ -3273,17 +3322,15 @@ function handleEmailLogin() {
 // ===== Google Sign In (New Tab/Redirect) =====
 function handleGoogleSignIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  // This opens a new tab/window instead of a popup
   auth.signInWithRedirect(provider)
     .then(() => {
-      // Redirect happens automatically, this runs when user returns
+      // Redirect happens automatically
     })
     .catch((err) => {
-      console.error(err);
-      // Filter out Firebase-specific error messages
-      if (err.code !== 'auth/cancelled-popup-request' && 
-          err.code !== 'auth/popup-closed-by-user') {
-        showToast(getFriendlyErrorMessage(err), 'error');
+      console.error(err); // Keep in console for debugging
+      const friendlyMsg = getFriendlyErrorMessage(err);
+      if (friendlyMsg) { // Only show toast if there's actually an error to show
+        showToast(friendlyMsg, 'error');
       }
     });
 }
@@ -3388,9 +3435,9 @@ function handleGoogleSignUp() {
     })
     .catch((err) => {
       console.error(err);
-      if (err.code !== 'auth/cancelled-popup-request' && 
-          err.code !== 'auth/popup-closed-by-user') {
-        showToast(getFriendlyErrorMessage(err), 'error');
+      const friendlyMsg = getFriendlyErrorMessage(err);
+      if (friendlyMsg) {
+        showToast(friendlyMsg, 'error');
       }
     });
 }
