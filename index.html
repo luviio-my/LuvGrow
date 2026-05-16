@@ -1878,6 +1878,47 @@ function updateAuthUI() {
   }
 }
 
+// Handle Google redirect result when user returns to the page
+auth.getRedirectResult()
+  .then((result) => {
+    if (result.user) {
+      // User just signed in via Google redirect
+      const isNewUser = result.additionalUserInfo.isNewUser;
+      
+      if (isNewUser) {
+        // Save new user data
+        return db.collection('users').doc(result.user.uid).set({
+          name: result.user.displayName || '',
+          email: result.user.email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          signupMethod: 'google'
+        }, { merge: true }).then(() => {
+          showToast('🎉 Account created with Google!', 'success');
+          navigate('/profile');
+        });
+      } else {
+        // Returning user - log the login
+        return db.collection('logins').add({
+          uid: result.user.uid,
+          email: result.user.email,
+          displayName: result.user.displayName,
+          method: 'google',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+          showToast('🌿 Welcome back!', 'success');
+          navigate('/profile');
+        });
+      }
+    }
+  })
+  .catch((err) => {
+    console.error(err);
+    if (err.code !== 'auth/cancelled-popup-request' && 
+        err.code !== 'auth/popup-closed-by-user') {
+      showToast(getFriendlyErrorMessage(err), 'error');
+    }
+  });
+
 // ===== ROUTER (Clean URLs - History API) =====
 const basePath = ''; // Change to '/subfolder/' if hosted in subdirectory
 
@@ -3229,26 +3270,21 @@ function handleEmailLogin() {
     });
 }
 
-// ===== Google Sign In =====
+// ===== Google Sign In (New Tab/Redirect) =====
 function handleGoogleSignIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then((result) => {
-      return db.collection('logins').add({
-        uid: result.user.uid,
-        email: result.user.email,
-        displayName: result.user.displayName,
-        method: 'google',
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    })
+  // This opens a new tab/window instead of a popup
+  auth.signInWithRedirect(provider)
     .then(() => {
-      showToast('🌿 Signed in with Google!', 'success');
-      navigate('/profile');
+      // Redirect happens automatically, this runs when user returns
     })
     .catch((err) => {
       console.error(err);
-      showToast(err.message || 'Google sign-in failed', 'error');
+      // Filter out Firebase-specific error messages
+      if (err.code !== 'auth/cancelled-popup-request' && 
+          err.code !== 'auth/popup-closed-by-user') {
+        showToast(getFriendlyErrorMessage(err), 'error');
+      }
     });
 }
 
@@ -3343,25 +3379,19 @@ function handleEmailSignup() {
     });
 }
 
-// ===== Google Sign Up =====
+// ===== Google Sign Up (New Tab/Redirect) =====
 function handleGoogleSignUp() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then((result) => {
-      return db.collection('users').doc(result.user.uid).set({
-        name: result.user.displayName || '',
-        email: result.user.email,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        signupMethod: 'google'
-      }, { merge: true });
-    })
+  auth.signInWithRedirect(provider)
     .then(() => {
-      showToast('🎉 Account created with Google!', 'success');
-      navigate('/profile');
+      // Redirect happens automatically
     })
     .catch((err) => {
       console.error(err);
-      showToast(err.message || 'Google signup failed', 'error');
+      if (err.code !== 'auth/cancelled-popup-request' && 
+          err.code !== 'auth/popup-closed-by-user') {
+        showToast(getFriendlyErrorMessage(err), 'error');
+      }
     });
 }
 
