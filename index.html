@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grow by Luviio — Malaysia & International Website Providers</title>
+<title>Grow by Luviio · Malaysia & International Website Developer.</title>
 <link rel="icon" type="image/png" href="https://images.luviio.com/favicon-luviio-red.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1919,6 +1919,7 @@ function getFriendlyErrorMessage(error) {
 }
 
 // ===== AUTH STATE LISTENER =====
+// ===== AUTH STATE LISTENER (Enhanced with Photo Support) =====
 auth.onAuthStateChanged(async (user) => {
   if (user) {
     isLoggedIn = true;
@@ -1928,6 +1929,8 @@ auth.onAuthStateChanged(async (user) => {
     // Set defaults from Firebase Auth immediately so UI doesn't show blank
     currentUser.name = user.displayName || user.email.split('@')[0];
     currentUser.initials = (user.displayName || user.email).split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    // IMPORTANT: Get photo from Auth first (faster), will be overridden by Firestore if exists
+    currentUser.photoURL = user.photoURL || '';
     
     try {
       // Fetch from Firestore and override with saved data
@@ -1937,15 +1940,18 @@ auth.onAuthStateChanged(async (user) => {
         if (data.name) currentUser.name = data.name;
         if (data.bio) currentUser.bio = data.bio;
         if (data.initials) currentUser.initials = data.initials;
+        // Load saved photo URL from Firestore (takes priority over Auth)
+        if (data.photoURL) {
+          currentUser.photoURL = data.photoURL;
+        }
       }
       
-      // Update Firebase Auth profile if name exists in Firestore but not on Auth
+      // Update Firebase Auth profile if needed
       if (!user.displayName && currentUser.name && currentUser.name !== user.email.split('@')[0]) {
         await user.updateProfile({ 
           displayName: currentUser.name,
-          photoURL: null 
+          photoURL: currentUser.photoURL || null // Sync photo to Auth too
         });
-        // Recalculate initials from the updated name
         currentUser.initials = currentUser.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
       }
     } catch (error) {
@@ -1960,7 +1966,7 @@ auth.onAuthStateChanged(async (user) => {
     }
   } else {
     isLoggedIn = false;
-    currentUser = { name: '', email: '', initials: '', bio: '', uid: null };
+    currentUser = { name: '', email: '', initials: '', bio: '', uid: null, photoURL: '' }; // Added photoURL reset
     updateAuthUI();
   }
 });
@@ -1990,57 +1996,21 @@ function updateAuthUI() {
   }
 }
 
-// Handle Google redirect result when user returns to the page
+// Handle Google redirect result when user returns to the page (Mobile users come here after redirect)
 auth.getRedirectResult()
   .then((result) => {
     if (result.user) {
-      // User just signed in via Google redirect
-      const isNewUser = result.additionalUserInfo.isNewUser;
-      
-      if (isNewUser) {
-        // Save new user data with Google photo URL
-        const userData = {
-          name: result.user.displayName || '',
-          email: result.user.email,
-          photoURL: result.user.photoURL || '',
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          signupMethod: 'google'
-        };
-        
-        return db.collection('users').doc(result.user.uid).set(userData, { merge: true }).then(() => {
-          showToast('🎉 Account created with Google!', 'success');
-          navigate('/profile');
-        });
-      } else {
-        // Returning user - update profile photo if available
-        const updateData = {};
-        if (result.user.photoURL) {
-          updateData.photoURL = result.user.photoURL;
-        }
-        
-        return db.collection('users').doc(result.user.uid).update(updateData).then(() => {
-          // Log the login
-          return db.collection('logins').add({
-            uid: result.user.uid,
-            email: result.user.email,
-            displayName: result.user.displayName,
-            method: 'google',
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        }).then(() => {
-          showToast('🌿 Welcome back!', 'success');
-          navigate('/profile');
-        });
-      }
+      // Process using shared function (handles both login & signup, saves photo)
+      return processGoogleAuthResult(result, result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false);
     }
   })
-.catch((err) => {
-      console.error(err); // Keep for debugging only
-      const friendlyMsg = getFriendlyErrorMessage(err);
-      if (friendlyMsg) { 
-        showToast(friendlyMsg, 'error');
-      }
-    });
+  .catch((err) => {
+    console.error(err); // Keep for debugging only
+    const friendlyMsg = getFriendlyErrorMessage(err);
+    if (friendlyMsg) { 
+      showToast(friendlyMsg, 'error');
+    }
+  });
 
 // ===== ROUTER (Clean URLs - History API) =====
 const basePath = ''; // Change to '/subfolder/' if hosted in subdirectory
@@ -2074,8 +2044,8 @@ document.addEventListener('click', (e) => {
 });
 
 const pageTitles = {
-  '/': 'Grow by Luviio — Malaysia & International Website Providers',
-  '/home': 'Grow by Luviio — Malaysia & International Website Providers',
+  '/': 'Grow by Luviio · Malaysia & International Website Developer.',
+  '/home': 'Grow by Luviio · Malaysia & International Website Developer.',
   '/product': 'Product & Components · Luviio',
   '/services': 'Our Services · Luviio',
   '/pricing': 'Pricing & Plans · Luviio',
@@ -2091,7 +2061,7 @@ const pageTitles = {
 };
 
 function setPageTitle(route) {
-  document.title = pageTitles[route] || 'LuvGrow — Design System for Vibe Coders';
+  document.title = pageTitles[route] || 'Grow by Luviio · Malaysia & International Website Developer.';
 }
 
 function router() {
@@ -3486,45 +3456,122 @@ function handleEmailLogin() {
     });
 }
 
-// ===== Google Sign In (Popup - New Tab Style) =====
+// ===== Google Sign In (Mobile-Friendly - Popup + Redirect Fallback) =====
 function handleGoogleSignIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  // Use signInWithPopup instead of redirect - opens popup window
-  auth.signInWithPopup(provider)
-    .then((result) => {
-      const user = result.user;
-      const isNewUser = result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false;
-      
-      if (isNewUser) {
-        return db.collection('users').doc(user.uid).set({
-          name: user.displayName || '',
-          email: user.email,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          signupMethod: 'google'
-        }, { merge: true }).then(() => {
-          showToast('🎉 Account created with Google!', 'success');
-          navigate('/profile');
-        });
-      } else {
-        return db.collection('logins').add({
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          method: 'google',
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
-          showToast('🌿 Welcome back!', 'success');
-          navigate('/profile');
-        });
-      }
-    })
-    .catch((err) => {
+  provider.addScope('profile'); // Ensure we get the photo URL
+  
+  // Detect mobile or small screen - use redirect instead of popup (more reliable on mobile)
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+  
+  if (isMobile) {
+    // MOBILE: Use Redirect (opens in same tab, returns properly)
+    showToast('📱 Redirecting to Google...', 'success');
+    auth.signInWithRedirect(provider).catch((err) => {
       console.error(err);
       const friendlyMsg = getFriendlyErrorMessage(err);
-      if (friendlyMsg && friendlyMsg !== '') {
-        showToast(friendlyMsg, 'error');
-      }
+      if (friendlyMsg && friendlyMsg !== '') showToast(friendlyMsg, 'error');
     });
+  } else {
+    // DESKTOP: Use Popup (better UX)
+    auth.signInWithPopup(provider)
+      .then((result) => processGoogleAuthResult(result, false))
+      .catch((err) => {
+        console.error(err);
+        // If popup blocked or failed (e.g., mobile desktop mode), try redirect as fallback
+        if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+          showToast('📱 Opening Google Sign-In...', 'success');
+          auth.signInWithRedirect(provider).catch((redirectErr) => {
+            const friendlyMsg = getFriendlyErrorMessage(redirectErr);
+            if (friendlyMsg && friendlyMsg !== '') showToast(friendlyMsg, 'error');
+          });
+        } else {
+          const friendlyMsg = getFriendlyErrorMessage(err);
+          if (friendlyMsg && friendlyMsg !== '') showToast(friendlyMsg, 'error');
+        }
+      });
+  }
+}
+
+// ===== Google Sign Up (Mobile-Friendly) =====
+function handleGoogleSignUp() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.addScope('profile');
+  
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+  
+  if (isMobile) {
+    showToast('📱 Redirecting to Google...', 'success');
+    auth.signInWithRedirect(provider).catch((err) => {
+      console.error(err);
+      const friendlyMsg = getFriendlyErrorMessage(err);
+      if (friendlyMsg && friendlyMsg !== '') showToast(friendlyMsg, 'error');
+    });
+  } else {
+    auth.signInWithPopup(provider)
+      .then((result) => processGoogleAuthResult(result, true))
+      .catch((err) => {
+        console.error(err);
+        if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+          showToast('📱 Opening Google Sign-Up...', 'success');
+          auth.signInWithRedirect(provider).catch((redirectErr) => {
+            const friendlyMsg = getFriendlyErrorMessage(redirectErr);
+            if (friendlyMsg && friendlyMsg !== '') showToast(friendlyMsg, 'error');
+          });
+        } else {
+          const friendlyMsg = getFriendlyErrorMessage(err);
+          if (friendlyMsg && friendlyMsg !== '') showToast(friendlyMsg, 'error');
+        }
+      });
+  }
+}
+
+// ===== PROCESS GOOGLE AUTH RESULT (Shared Logic for Login & Signup) =====
+function processGoogleAuthResult(result, isSignup) {
+  const user = result.user;
+  const isNewUser = result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false;
+  
+  // CRITICAL: Get the photo URL from Google immediately
+  const googlePhotoURL = user.photoURL || '';
+  
+  // Update local state immediately so UI updates fast
+  currentUser.photoURL = googlePhotoURL;
+  currentUser.name = user.displayName || '';
+  currentUser.email = user.email;
+  currentUser.initials = (user.displayName || user.email).split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  
+  const userData = {
+    name: user.displayName || '',
+    email: user.email,
+    photoURL: googlePhotoURL, // Save Google profile picture to Firestore
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  
+  if (isNewUser || isSignup) {
+    Object.assign(userData, {
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      signupMethod: 'google'
+    });
+    
+    return db.collection('users').doc(user.uid).set(userData, { merge: true }).then(() => {
+      showToast('🎉 Account created with Google!', 'success');
+      navigate('/profile');
+    });
+  } else {
+    // Returning user - update photo if changed (Google photos can change over time)
+    return db.collection('users').doc(user.uid).update(userData).then(() => {
+      return db.collection('logins').add({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        method: 'google',
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }).then(() => {
+      showToast('🌿 Welcome back!', 'success');
+      navigate('/profile');
+    });
+  }
 }
 
 // ===== Forgot Password (from login page link) =====
@@ -3660,19 +3707,25 @@ function handleGoogleSignUp() {
     });
 }
 
-// ===== PROFILE PAGE =====
+// ===== PROFILE PAGE (Enhanced with Photo Display) =====
 function renderProfile(el) {
-  // FIX #4: Show profile even if not logged in yet (waiting for auth state)
-  // If user is not logged in after auth loads, show a message or redirect
   const displayName = currentUser.name || 'User';
   const displayEmail = currentUser.email || '';
   const displayInitials = currentUser.initials || '?';
   const displayPhotoURL = currentUser.photoURL || '';
 
-  // Build avatar HTML based on whether we have a photo
+  // Build avatar HTML - Shows image if valid URL, otherwise shows initials
   let avatarHTML = '';
-  if (displayPhotoURL) {
-    avatarHTML = `<img src="${displayPhotoURL}" alt="${displayName}'s profile picture" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  if (displayPhotoURL && displayPhotoURL.trim() !== '' && displayPhotoURL.startsWith('http')) {
+    // Show actual photo with error fallback to initials if image breaks
+    avatarHTML = `
+      <img src="${displayPhotoURL}" 
+           alt="${displayName}'s profile picture" 
+           style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+      >
+      <span style="display:none">${displayInitials}</span>
+    `;
   } else {
     avatarHTML = displayInitials;
   }
@@ -3685,8 +3738,17 @@ function renderProfile(el) {
         <div class="profile-info">
           <h2>${displayName}</h2>
           <p>${displayEmail}</p>
+          ${displayPhotoURL ? '<p style="font-size:12px;color:#8B8B7A;margin-top:4px">✓ Profile photo synced from Google</p>' : ''}
         </div>
       </div>
+      
+      ${displayPhotoURL ? `
+      <!-- Option to remove Google Photo -->
+      <div style="margin:0 0 20px;padding:12px;background:var(--primary-tint);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <span style="font-size:13px;color:var(--text)">Using Google Profile Picture</span>
+        <button type="button" onclick="removeGooglePhoto()" style="background:none;border:none;color:var(--primary);font-size:13px;font-weight:600;cursor:pointer;padding:6px 12px;border-radius:6px;transition:background .2s" onmouseover="this.style.background='rgba(171,21,9,0.1)'" onmouseout="this.style.background='transparent'">Remove Photo</button>
+      </div>
+      ` : ''}
       
       <form class="profile-form" onsubmit="handleProfileSave(event)">
         <div><label>First Name</label><input type="text" id="profileFirstName" value="${displayName.split(' ')[0] || ''}"></div>
@@ -3700,6 +3762,25 @@ function renderProfile(el) {
       </form>
     </div>
   </div>`;
+}
+
+// ===== NEW FUNCTION: Remove Google Profile Photo =====
+function removeGooglePhoto() {
+  if (!currentUser.uid) return;
+  
+  db.collection('users').doc(currentUser.uid).update({
+    photoURL: '' // Clear photo in Firestore
+  }).then(() => {
+    currentUser.photoURL = ''; // Clear local state
+    // Also clear from Firebase Auth
+    if (auth.currentUser) {
+      auth.currentUser.updateProfile({ photoURL: null });
+    }
+    showToast('Profile photo removed', 'success');
+    router(); // Refresh profile view to show initials again
+  }).catch(() => {
+    showToast('Error removing photo', 'error');
+  });
 }
 
 // ===== Profile Save =====
