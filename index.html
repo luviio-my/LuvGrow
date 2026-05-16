@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LuvGrow — Design System for Vibe Coders</title>
+<title>Grow by Luviio — Malaysia & International Website Providers</title>
 <link rel="icon" type="image/png" href="https://images.luviio.com/favicon-luviio-red.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1919,28 +1919,48 @@ function getFriendlyErrorMessage(error) {
 }
 
 // ===== AUTH STATE LISTENER =====
-auth.onAuthStateChanged((user) => {
+auth.onAuthStateChanged(async (user) => {
   if (user) {
     isLoggedIn = true;
     currentUser.uid = user.uid;
     currentUser.email = user.email;
+    
+    // Set defaults from Firebase Auth immediately so UI doesn't show blank
     currentUser.name = user.displayName || user.email.split('@')[0];
     currentUser.initials = (user.displayName || user.email).split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-    currentUser.photoURL = user.photoURL || '';
     
-    db.collection('users').doc(user.uid).get().then((doc) => {
+    try {
+      // Fetch from Firestore and override with saved data
+      const doc = await db.collection('users').doc(user.uid).get();
       if (doc.exists) {
         const data = doc.data();
         if (data.name) currentUser.name = data.name;
         if (data.bio) currentUser.bio = data.bio;
-        if (data.photoURL) currentUser.photoURL = data.photoURL;
+        if (data.initials) currentUser.initials = data.initials;
       }
-    }).catch(() => {});
+      
+      // Update Firebase Auth profile if name exists in Firestore but not on Auth
+      if (!user.displayName && currentUser.name && currentUser.name !== user.email.split('@')[0]) {
+        await user.updateProfile({ 
+          displayName: currentUser.name,
+          photoURL: null 
+        });
+        // Recalculate initials from the updated name
+        currentUser.initials = currentUser.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
     
     updateAuthUI();
+    
+    // If we're currently on the profile page, re-render it with fresh data
+    if (getRoute() === '/profile') {
+      router();
+    }
   } else {
     isLoggedIn = false;
-    currentUser = { name: '', email: '', initials: '', bio: '', uid: null, photoURL: '' };
+    currentUser = { name: '', email: '', initials: '', bio: '', uid: null };
     updateAuthUI();
   }
 });
@@ -2054,8 +2074,8 @@ document.addEventListener('click', (e) => {
 });
 
 const pageTitles = {
-  '/': 'LuvGrow — Design System for Vibe Coders',
-  '/home': 'LuvGrow — Design System for Vibe Coders',
+  '/': 'Grow by Luviio — Malaysia & International Website Providers',
+  '/home': 'Grow by Luviio — Malaysia & International Website Providers',
   '/product': 'Product & Components · Luviio',
   '/services': 'Our Services · Luviio',
   '/pricing': 'Pricing & Plans · Luviio',
@@ -3466,29 +3486,44 @@ function handleEmailLogin() {
     });
 }
 
-// ===== Google Sign In (New Tab/Redirect) =====
+// ===== Google Sign In (Popup - New Tab Style) =====
 function handleGoogleSignIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  
-  // Show loading state
-  const btn = event.target;
-  const originalHTML = btn.innerHTML;
-  btn.innerHTML = 'Connecting...';
-  btn.disabled = true;
-
-  auth.signInWithRedirect(provider)
-    .then(() => {
-      // Redirect happens automatically - page will reload
+  // Use signInWithPopup instead of redirect - opens popup window
+  auth.signInWithPopup(provider)
+    .then((result) => {
+      const user = result.user;
+      const isNewUser = result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false;
+      
+      if (isNewUser) {
+        return db.collection('users').doc(user.uid).set({
+          name: user.displayName || '',
+          email: user.email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          signupMethod: 'google'
+        }, { merge: true }).then(() => {
+          showToast('🎉 Account created with Google!', 'success');
+          navigate('/profile');
+        });
+      } else {
+        return db.collection('logins').add({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          method: 'google',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+          showToast('🌿 Welcome back!', 'success');
+          navigate('/profile');
+        });
+      }
     })
     .catch((err) => {
-      console.error(err); // Keep in console for debugging
+      console.error(err);
       const friendlyMsg = getFriendlyErrorMessage(err);
-      if (friendlyMsg) { 
+      if (friendlyMsg && friendlyMsg !== '') {
         showToast(friendlyMsg, 'error');
       }
-      // Restore button
-      btn.innerHTML = originalHTML;
-      btn.disabled = false;
     });
 }
 
@@ -3584,27 +3619,44 @@ function handleEmailSignup() {
     });
 }
 
-// ===== Google Sign Up (New Tab/Redirect) =====
+// ===== Google Sign Up (Popup - New Tab Style) =====
 function handleGoogleSignUp() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  
-  const btn = event.target;
-  const originalHTML = btn.innerHTML;
-  btn.innerHTML = 'Connecting...';
-  btn.disabled = true;
-
-  auth.signInWithRedirect(provider)
-    .then(() => {
-      // Redirect happens automatically
+  // Use signInWithPopup instead of redirect - opens popup window
+  auth.signInWithPopup(provider)
+    .then((result) => {
+      const user = result.user;
+      const isNewUser = result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false;
+      
+      if (isNewUser) {
+        return db.collection('users').doc(user.uid).set({
+          name: user.displayName || '',
+          email: user.email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          signupMethod: 'google'
+        }, { merge: true }).then(() => {
+          showToast('🎉 Account created with Google!', 'success');
+          navigate('/profile');
+        });
+      } else {
+        return db.collection('logins').add({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          method: 'google',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+          showToast('🌿 Welcome back!', 'success');
+          navigate('/profile');
+        });
+      }
     })
     .catch((err) => {
       console.error(err);
       const friendlyMsg = getFriendlyErrorMessage(err);
-      if (friendlyMsg) {
+      if (friendlyMsg && friendlyMsg !== '') {
         showToast(friendlyMsg, 'error');
       }
-      btn.innerHTML = originalHTML;
-      btn.disabled = false;
     });
 }
 
