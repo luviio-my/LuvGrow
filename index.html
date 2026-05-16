@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grow by Luviio · Malaysia & International Website Developer.</title>
+<title>LuvGrow — Design System for Vibe Coders</title>
 <link rel="icon" type="image/png" href="https://images.luviio.com/favicon-luviio-red.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1863,6 +1863,13 @@ let isLoggedIn = false;
 let currentUser = { name: '', email: '', initials: '', bio: '', uid: null, photoURL: '' };
 let selectedPlan = null;
 
+// ===== MOBILE DETECTION =====
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+    || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2)
+    || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+}
+
 const plans = {
   starter: { name: 'Starter', price: '150 MYR/mo', priceNum: 150, stripeUrl: 'https://buy.stripe.com/fZu6oB6x24azflI2Mw97G05' },
   growth: { name: 'Growth', price: '300 MYR/mo', priceNum: 300, stripeUrl: 'https://buy.stripe.com/8x2aERcVq5eD7Tgcn697G06' },
@@ -1996,16 +2003,61 @@ function updateAuthUI() {
   }
 }
 
-// Handle Google redirect result when user returns to the page (Mobile users come here after redirect)
+// Handle Google redirect result when user returns to the page
 auth.getRedirectResult()
   .then((result) => {
     if (result.user) {
-      // Process using shared function (handles both login & signup, saves photo)
-      return processGoogleAuthResult(result, result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false);
+      // User just signed in via Google redirect (mobile flow)
+      const isNewUser = result.additionalUserInfo && result.additionalUserInfo.isNewUser;
+      
+      // Prevent duplicate processing if already logged in
+      if (!isLoggedIn) {
+        if (isNewUser) {
+          // Save new user data with Google photo URL
+          const userData = {
+            name: result.user.displayName || '',
+            email: result.user.email,
+            photoURL: result.user.photoURL || '',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            signupMethod: 'google'
+          };
+          
+          return db.collection('users').doc(result.user.uid).set(userData, { merge: true }).then(() => {
+            showToast('🎉 Account created with Google!', 'success');
+            // Force navigation after short delay to ensure auth state propagates
+            setTimeout(() => navigate('/profile'), 500);
+          });
+        } else {
+          // Returning user - update profile photo if available
+          const updateData = {};
+          if (result.user.photoURL) {
+            updateData.photoURL = result.user.photoURL;
+          }
+          
+          return db.collection('users').doc(result.user.uid).update(updateData).then(() => {
+            // Log the login
+            return db.collection('logins').add({
+              uid: result.user.uid,
+              email: result.user.email,
+              displayName: result.user.displayName,
+              method: 'google',
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          }).then(() => {
+            showToast('🌿 Welcome back!', 'success');
+            setTimeout(() => navigate('/profile'), 500);
+          });
+        }
+      } else {
+        // Already logged in, just ensure we're on profile
+        if (getRoute() === '/login' || getRoute() === '/signup') {
+          navigate('/profile');
+        }
+      }
     }
   })
   .catch((err) => {
-    console.error(err); // Keep for debugging only
+    console.error('Redirect result error:', err); // Keep for debugging only
     const friendlyMsg = getFriendlyErrorMessage(err);
     if (friendlyMsg) { 
       showToast(friendlyMsg, 'error');
@@ -2044,8 +2096,8 @@ document.addEventListener('click', (e) => {
 });
 
 const pageTitles = {
-  '/': 'Grow by Luviio · Malaysia & International Website Developer.',
-  '/home': 'Grow by Luviio · Malaysia & International Website Developer.',
+  '/': 'LuvGrow — Design System for Vibe Coders',
+  '/home': 'LuvGrow — Design System for Vibe Coders',
   '/product': 'Product & Components · Luviio',
   '/services': 'Our Services · Luviio',
   '/pricing': 'Pricing & Plans · Luviio',
@@ -2061,7 +2113,7 @@ const pageTitles = {
 };
 
 function setPageTitle(route) {
-  document.title = pageTitles[route] || 'Grow by Luviio · Malaysia & International Website Developer.';
+  document.title = pageTitles[route] || 'LuvGrow — Design System for Vibe Coders';
 }
 
 function router() {
@@ -2216,7 +2268,7 @@ const standardFooter = `
       <div class="footer-col"><h4>Company</h4><a href="/about">About</a><a href="/company">Careers</a><a href="/pricing">Pricing</a><a href="/terms">Terms</a><a href="/policy">Privacy Policy</a><a href="/contact">Contact Us</a></div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2025 LuvGrow. All rights reserved.</p>
+      <p>&copy; 2026 LuvGrow. All rights reserved.</p>
       <div class="footer-socials">
         <button class="social-btn" aria-label="Twitter" onclick="showToast('Opening Twitter...','success')"><i data-lucide="twitter" style="width:16px;height:16px"></i></button>
         <button class="social-btn" aria-label="GitHub" onclick="showToast('Opening GitHub...','success')"><i data-lucide="github" style="width:16px;height:16px"></i></button>
@@ -3126,7 +3178,7 @@ function renderAbout(el) {
         <h2>Get In Touch</h2>
         <p>Ready to start your next project? We'd love to hear from you. Reach out via our <a href="/contact">contact form</a> or email us directly at <a href="mailto:hello@luviio.com">hello@luviio.com</a>.</p>
         
-        <div class="last-updated">Last updated: January 2025</div>
+        <div class="last-updated">Last updated: January 2026</div>
       </div>
     </div>
   </div>
@@ -3145,7 +3197,7 @@ function renderTerms(el) {
       </div>
       
       <div class="animate-on-scroll animate-delay-2">
-        <p style="font-size:14px;color:#8B8B7A;margin-bottom:32px">Last updated: January 1, 2025</p>
+        <p style="font-size:14px;color:#8B8B7A;margin-bottom:32px">Last updated: January 1, 2026</p>
         
         <h2>1. Acceptance of Terms</h2>
         <p>By accessing or using LuvGrow's services ("Services"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these terms, please do not use our Services.</p>
@@ -3194,7 +3246,7 @@ function renderTerms(el) {
         <p>For questions about these Terms, please contact us at:</p>
         <p><strong>LuvGrow Sdn Bhd</strong><br>Email: legal@luvgrow.com<br>Address: Kuala Lumpur, Malaysia</p>
         
-        <div class="last-updated">Effective date: January 1, 2025</div>
+        <div class="last-updated">Effective date: January 1, 2026</div>
       </div>
     </div>
   </div>
@@ -3213,7 +3265,7 @@ function renderPolicy(el) {
       </div>
       
       <div class="animate-on-scroll animate-delay-2">
-        <p style="font-size:14px;color:#8B8B7A;margin-bottom:32px">Last updated: January 1, 2025</p>
+        <p style="font-size:14px;color:#8B8B7A;margin-bottom:32px">Last updated: January 1, 2026</p>
         
         <h2>1. Information We Collect</h2>
         <h3>Information You Provide</h3>
@@ -3294,7 +3346,7 @@ function renderPolicy(el) {
         <p>For privacy-related inquiries:</p>
         <p><strong>LuvGrow Sdn Bhd</strong><br>Email: privacy@luvgrow.com<br>Address: Kuala Lumpur, Malaysia</p>
         
-        <div class="last-updated">Effective date: January 1, 2025</div>
+        <div class="last-updated">Effective date: January 1, 2026</div>
       </div>
     </div>
   </div>
@@ -3459,35 +3511,57 @@ function handleEmailLogin() {
 // ===== Google Sign In (Mobile-Friendly - Popup + Redirect Fallback) =====
 function handleGoogleSignIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  provider.addScope('profile'); // Ensure we get the photo URL
   
-  // Detect mobile or small screen - use redirect instead of popup (more reliable on mobile)
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
-  
-  if (isMobile) {
-    // MOBILE: Use Redirect (opens in same tab, returns properly)
-    showToast('📱 Redirecting to Google...', 'success');
-    auth.signInWithRedirect(provider).catch((err) => {
-      console.error(err);
-      const friendlyMsg = getFriendlyErrorMessage(err);
-      if (friendlyMsg && friendlyMsg !== '') showToast(friendlyMsg, 'error');
-    });
-  } else {
-    // DESKTOP: Use Popup (better UX)
-    auth.signInWithPopup(provider)
-      .then((result) => processGoogleAuthResult(result, false))
+  // CRITICAL FIX: Use Redirect on mobile, Popup on desktop
+  if (isMobileDevice()) {
+    // Mobile: Use redirect (popup gets blocked/closed unexpectedly on mobile)
+    auth.signInWithRedirect(provider)
+      .then(() => {
+        // Show loading state while redirecting
+        showToast('🔄 Redirecting to Google...', 'success');
+      })
       .catch((err) => {
         console.error(err);
-        // If popup blocked or failed (e.g., mobile desktop mode), try redirect as fallback
-        if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-          showToast('📱 Opening Google Sign-In...', 'success');
-          auth.signInWithRedirect(provider).catch((redirectErr) => {
-            const friendlyMsg = getFriendlyErrorMessage(redirectErr);
-            if (friendlyMsg && friendlyMsg !== '') showToast(friendlyMsg, 'error');
+        const friendlyMsg = getFriendlyErrorMessage(err);
+        if (friendlyMsg && friendlyMsg !== '') {
+          showToast(friendlyMsg, 'error');
+        }
+      });
+  } else {
+    // Desktop: Use popup (better UX)
+    auth.signInWithPopup(provider)
+      .then((result) => {
+        const user = result.user;
+        const isNewUser = result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false;
+        
+        if (isNewUser) {
+          return db.collection('users').doc(user.uid).set({
+            name: user.displayName || '',
+            email: user.email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            signupMethod: 'google'
+          }, { merge: true }).then(() => {
+            showToast('🎉 Account created with Google!', 'success');
+            navigate('/profile');
           });
         } else {
-          const friendlyMsg = getFriendlyErrorMessage(err);
-          if (friendlyMsg && friendlyMsg !== '') showToast(friendlyMsg, 'error');
+          return db.collection('logins').add({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            method: 'google',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          }).then(() => {
+            showToast('🌿 Welcome back!', 'success');
+            navigate('/profile');
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        const friendlyMsg = getFriendlyErrorMessage(err);
+        if (friendlyMsg && friendlyMsg !== '') {
+          showToast(friendlyMsg, 'error');
         }
       });
   }
@@ -3669,42 +3743,59 @@ function handleEmailSignup() {
 // ===== Google Sign Up (Popup - New Tab Style) =====
 function handleGoogleSignUp() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  // Use signInWithPopup instead of redirect - opens popup window
-  auth.signInWithPopup(provider)
-    .then((result) => {
-      const user = result.user;
-      const isNewUser = result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false;
-      
-      if (isNewUser) {
-        return db.collection('users').doc(user.uid).set({
-          name: user.displayName || '',
-          email: user.email,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          signupMethod: 'google'
-        }, { merge: true }).then(() => {
-          showToast('🎉 Account created with Google!', 'success');
-          navigate('/profile');
-        });
-      } else {
-        return db.collection('logins').add({
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          method: 'google',
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
-          showToast('🌿 Welcome back!', 'success');
-          navigate('/profile');
-        });
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      const friendlyMsg = getFriendlyErrorMessage(err);
-      if (friendlyMsg && friendlyMsg !== '') {
-        showToast(friendlyMsg, 'error');
-      }
-    });
+  
+  // CRITICAL FIX: Use Redirect on mobile, Popup on desktop
+  if (isMobileDevice()) {
+    // Mobile: Use redirect method
+    auth.signInWithRedirect(provider)
+      .then(() => {
+        showToast('🔄 Redirecting to Google...', 'success');
+      })
+      .catch((err) => {
+        console.error(err);
+        const friendlyMsg = getFriendlyErrorMessage(err);
+        if (friendlyMsg && friendlyMsg !== '') {
+          showToast(friendlyMsg, 'error');
+        }
+      });
+  } else {
+    // Desktop: Use popup method
+    auth.signInWithPopup(provider)
+      .then((result) => {
+        const user = result.user;
+        const isNewUser = result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false;
+        
+        if (isNewUser) {
+          return db.collection('users').doc(user.uid).set({
+            name: user.displayName || '',
+            email: user.email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            signupMethod: 'google'
+          }, { merge: true }).then(() => {
+            showToast('🎉 Account created with Google!', 'success');
+            navigate('/profile');
+          });
+        } else {
+          return db.collection('logins').add({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            method: 'google',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          }).then(() => {
+            showToast('🌿 Welcome back!', 'success');
+            navigate('/profile');
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        const friendlyMsg = getFriendlyErrorMessage(err);
+        if (friendlyMsg && friendlyMsg !== '') {
+          showToast(friendlyMsg, 'error');
+        }
+      });
+  }
 }
 
 // ===== PROFILE PAGE (Enhanced with Photo Display) =====
