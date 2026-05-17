@@ -3,9 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LuvGrow — Design System for Vibe Coders</title>
-<link rel="icon" type="image/png" href="https://images.luviio.com/favicon-luviio-red.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>Luviio · Malaysia & Worldwide Website Developer</title>
+<!-- Standard favicon -->
+<link rel="icon" href="https://images.luviio.com/favicon.ico" sizes="any">
+
+<!-- PNG favicons -->
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.luviio.com/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://images.luviio.com/favicon-16x16.png">
+
+<!-- Apple devices -->
+<link rel="apple-touch-icon" sizes="180x180" href="https://images.luviio.com/apple-touch-icon.png">
+
+<!-- Android / PWA -->
+<link rel="manifest" href="/site.webmanifest"><link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -2756,7 +2766,7 @@ async function handleMemberJoin() {
   }
 }
 
-// ===== CONTACT FORM HANDLER (UPDATED TO USE CLOUDFLARE API) =====
+// ===== CONTACT FORM HANDLER (FIXED) =====
 async function handleContactSubmit(e) {
   e.preventDefault();
   const form = document.getElementById('contactForm');
@@ -2769,10 +2779,11 @@ async function handleContactSubmit(e) {
   btn.disabled = true;
 
   try {
-    // Call Cloudflare Workers API instead of direct Firestore write
+    // FIX: Combine firstName + lastName into "name" field that API expects
+    const fullName = `${formData.get('firstName') || ''} ${formData.get('lastName') || ''}`.trim();
+    
     await callLuviioAPI('contact', {
-      firstName: formData.get('firstName'),
-      lastName: formData.get('lastName'),
+      name: fullName,                    // ← API expects "name", not firstName/lastName
       email: formData.get('email'),
       phone: formData.get('phone'),
       service: formData.get('service'),
@@ -3986,7 +3997,7 @@ function renderContact(el) {
   ${standardFooter}`;
 }
 
-// ===== CONTACT PAGE SUBMIT HANDLER (UPDATED TO USE CLOUDFLARE API) =====
+// ===== CONTACT PAGE SUBMIT HANDLER (FIXED) =====
 async function handleContactPageSubmit(e) {
   e.preventDefault();
   const form = document.getElementById('contactFormPage');
@@ -3999,10 +4010,11 @@ async function handleContactPageSubmit(e) {
   btn.disabled = true;
 
   try {
-    // Call Cloudflare Workers API instead of direct Firestore write
+    // FIX: Combine firstName + lastName into "name" field that API expects
+    const fullName = `${formData.get('firstName') || ''} ${formData.get('lastName') || ''}`.trim();
+
     await callLuviioAPI('contact', {
-      firstName: formData.get('firstName'),
-      lastName: formData.get('lastName'),
+      name: fullName,                    // ← API expects "name"
       email: formData.get('email'),
       phone: formData.get('phone'),
       service: formData.get('service'),
