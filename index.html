@@ -572,7 +572,7 @@
   .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:36px;width:100%}
   .team-card{text-align:center;padding:28px 18px;background:#fff;border:1px solid var(--warm-light);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);transition:all .3px;width:100%;box-sizing:border-box}
   .team-card:hover{transform:translateY(-6px);box-shadow:0 12px 32px rgba(0,0,0,.1)}
-  .team-card .team-avatar{width:68px;height:68px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;transition:transform .3px}
+  .team-card .team-avatar{width:68px;height:68px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;transition:transform .3s}
   .team-card:hover .team-avatar{transform:scale(1.1)}
   .team-card h4{font-size:16px;font-weight:700;margin-bottom:3px}
   .team-card p{font-size:13px;color:#8B8B7A}
@@ -1086,7 +1086,7 @@
     
     .content-page{padding:60px 0}
     .content-page h1{font-size:36px;line-height:42px}
-    .content-page h2{font-size:26px;margin:36px 0 14px}
+    .content-page h2{font-size:26px;margin:36px 0 14px;padding-bottom:10px}
     .content-page h3{font-size:20px;margin:24px 0 10px}
     .content-page p,.content-page ul,.content-page ol{font-size:15px;line-height:26px}
     
@@ -1261,6 +1261,8 @@
     .contact-details{gap:14px}
     .contact-item{padding:14px;border-radius:10px;gap:12px}
     .contact-item-icon{width:38px;height:38px}
+    .contact-item-text strong{font-size:12px}
+    .contact-item-text span{font-size:11px}
     .contact-form-card{padding:24px 20px;border-radius:14px}
     .form-group{margin-bottom:16px}
     .form-group label{font-size:11px;margin-bottom:6px;letter-spacing:.03em}
@@ -1316,7 +1318,7 @@
     .profile-actions button{min-width:auto}
     
     .checkout-container {
-      padding: 24px 16px 60px;
+      padding: 24px 20px 60px;
     }
     .checkout-back-wrapper {
       margin-bottom: 24px;
@@ -1864,6 +1866,42 @@ let currentUser = { name: '', email: '', initials: '', bio: '', uid: null, photo
 let selectedPlan = null;
 let authInitialized = false;
 
+// ===== CLOUDFLARE WORKERS API CONFIGURATION =====
+const LUVIIO_API_URL = 'https://luviio-api.luviio.com';
+
+// ===== API HELPER FUNCTION =====
+// Handles authentication token injection and error handling
+async function callLuviioAPI(type, data) {
+  try {
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    
+    // Attach Firebase Auth token if user is logged in (for optional auth)
+    if (auth.currentUser) {
+      const token = await auth.currentUser.getIdToken();
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await fetch(LUVIIO_API_URL, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ type, ...data })
+    });
+    
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.error || `API Error: ${response.status}`);
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('[Luviio API] Error:', error);
+    throw error;
+  }
+}
+
 // ===== MOBILE DETECTION =====
 function isMobileDevice() {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
@@ -2035,7 +2073,7 @@ auth.getRedirectResult()
           setTimeout(() => navigate('/profile'), 300);
         });
       }
-    }
+     }
   })
   .catch((err) => {
     const friendlyMsg = getFriendlyErrorMessage(err);
@@ -2691,19 +2729,23 @@ function selectPlanAndCheckout(planId) {
   navigate('/checkout');
 }
 
-// ===== MEMBER JOIN HANDLER =====
-function handleMemberJoin() {
+// ===== MEMBER JOIN HANDLER (UPDATED TO USE CLOUDFLARE API) =====
+async function handleMemberJoin() {
   const emailInput = document.getElementById('memberEmail');
   if (emailInput && emailInput.value && emailInput.value.includes('@')) {
-    db.collection('members').add({
-      email: emailInput.value,
-      joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      status: 'active',
-      source: 'homepage'
-    }).then(() => {
+    try {
+      // Call Cloudflare Workers API instead of direct Firestore write
+      await callLuviioAPI('newsletter', {
+        email: emailInput.value,
+        source: 'homepage_membership'
+      });
+      
       showToast(`🎉 Welcome aboard! Confirmation sent to ${emailInput.value}`, 'success');
       emailInput.value = '';
-    }).catch(() => { showToast('Error joining. Please try again.', 'error'); });
+    } catch (error) {
+      console.error('[Member Join Error]', error);
+      showToast(error.message || 'Error joining. Please try again.', 'error');
+    }
   } else {
     if (emailInput) {
       emailInput.style.borderColor = 'var(--error)';
@@ -2714,8 +2756,8 @@ function handleMemberJoin() {
   }
 }
 
-// ===== CONTACT FORM HANDLER =====
-function handleContactSubmit(e) {
+// ===== CONTACT FORM HANDLER (UPDATED TO USE CLOUDFLARE API) =====
+async function handleContactSubmit(e) {
   e.preventDefault();
   const form = document.getElementById('contactForm');
   const success = document.getElementById('formSuccess');
@@ -2726,28 +2768,29 @@ function handleContactSubmit(e) {
   btn.innerHTML = 'Sending...';
   btn.disabled = true;
 
-  db.collection('contacts').add({
-    firstName: formData.get('firstName'),
-    lastName: formData.get('lastName'),
-    email: formData.get('email'),
-    phone: formData.get('phone'),
-    service: formData.get('service'),
-    message: formData.get('message'),
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    userId: currentUser.uid || null,
-    status: 'new'
-  }).then(() => {
+  try {
+    // Call Cloudflare Workers API instead of direct Firestore write
+    await callLuviioAPI('contact', {
+      firstName: formData.get('firstName'),
+      lastName: formData.get('lastName'),
+      email: formData.get('email'),
+      phone: formData.get('phone'),
+      service: formData.get('service'),
+      message: formData.get('message'),
+      source: 'homepage_contact'
+    });
+    
     btn.innerHTML = originalText;
     btn.disabled = false;
     form.reset();
     if (success) success.classList.add('show');
     showToast('📧 Message sent successfully!', 'success');
     setTimeout(() => { if (success) success.classList.remove('show'); }, 5000);
-  }).catch((error) => {
+  } catch (error) {
     btn.innerHTML = originalText;
     btn.disabled = false;
-    showToast('Error sending message. Please try again.', 'error');
-  });
+    showToast(error.message || 'Error sending message. Please try again.', 'error');
+  }
 }
 
 // ===== PRODUCT PAGE WITH TOOLS =====
@@ -3886,7 +3929,7 @@ function handleLogout() {
   }).catch((err) => showToast('Logout error', 'error'));
 }
 
-// ===== CONTACT PAGE =====
+// ===== CONTACT PAGE (UPDATED TO USE CLOUDFLARE API) =====
 function renderContact(el) {
   el.innerHTML = `
   <div class="page-hero">
@@ -3943,7 +3986,8 @@ function renderContact(el) {
   ${standardFooter}`;
 }
 
-function handleContactPageSubmit(e) {
+// ===== CONTACT PAGE SUBMIT HANDLER (UPDATED TO USE CLOUDFLARE API) =====
+async function handleContactPageSubmit(e) {
   e.preventDefault();
   const form = document.getElementById('contactFormPage');
   const success = document.getElementById('contactPageSuccess');
@@ -3954,29 +3998,29 @@ function handleContactPageSubmit(e) {
   btn.innerHTML = 'Sending...';
   btn.disabled = true;
 
-  db.collection('contacts').add({
-    firstName: formData.get('firstName'),
-    lastName: formData.get('lastName'),
-    email: formData.get('email'),
-    phone: formData.get('phone'),
-    service: formData.get('service'),
-    message: formData.get('message'),
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    source: 'contact_page',
-    userId: currentUser.uid || null,
-    status: 'new'
-  }).then(() => {
+  try {
+    // Call Cloudflare Workers API instead of direct Firestore write
+    await callLuviioAPI('contact', {
+      firstName: formData.get('firstName'),
+      lastName: formData.get('lastName'),
+      email: formData.get('email'),
+      phone: formData.get('phone'),
+      service: formData.get('service'),
+      message: formData.get('message'),
+      source: 'contact_page'
+    });
+
     btn.innerHTML = originalText;
     btn.disabled = false;
     form.reset();
     if (success) success.classList.add('show');
     showToast('📧 Message sent successfully!', 'success');
     setTimeout(() => { if (success) success.classList.remove('show'); }, 5000);
-  }).catch((error) => {
+  } catch (error) {
     btn.innerHTML = originalText;
     btn.disabled = false;
-    showToast('Error sending message. Please try again.', 'error');
-  });
+    showToast(error.message || 'Error sending message. Please try again.', 'error');
+  }
 }
 
 // ==========================================
@@ -4106,7 +4150,7 @@ function renderCheckout(el) {
           Secure
         </div>
         <div class="trust-item-mini">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M9 12l2 2 4-4"></path></svg>
           Protected
         </div>
         <div class="trust-item-mini">
@@ -4119,7 +4163,7 @@ function renderCheckout(el) {
 }
 
 // ===== Handle Clean Checkout Form Submit =====
-function handleCheckoutSubmitClean(e) {
+async function handleCheckoutSubmitClean(e) {
   e.preventDefault();
   
   const form = document.getElementById('checkoutFormClean');
@@ -4131,7 +4175,7 @@ function handleCheckoutSubmitClean(e) {
   if (!formData.get('firstName') || !formData.get('lastName') || 
       !formData.get('email') || !formData.get('phone')) {
     if (errorBanner) {
-      errorBanner.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15"  y1="9" x2="9" y2="15"></line><line x1="15" y1="9" x2="15" y2="15"></line></svg>` + 
+      errorBanner.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>` + 
         ' Please fill in all required fields.';
       errorBanner.classList.add('show');
     }
@@ -4159,31 +4203,33 @@ function handleCheckoutSubmitClean(e) {
     stripeUrl: plans[selectedPlan].stripeUrl
   };
 
-  db.collection('orders').add(orderData)
-    .then((docRef) => {
-      // Update progress dots
-      document.getElementById('progressDot1').classList.remove('active');
-      document.getElementById('progressDot1').classList.add('completed');
-      document.getElementById('progressLineMini').classList.add('filled');
-      document.getElementById('progressDot2').classList.add('active');
-      
-      // Hide step 1, show payment view
-      document.getElementById('checkoutStep1Body').style.display = 'none';
-      const paymentView = document.getElementById('checkoutPaymentView');
-      paymentView.classList.add('visible');
-      
-      showToast('✅ Details saved! Proceeding to payment...', 'success');
-    })
-    .catch((err) => {
-      if (errorBanner) {
-        errorBanner.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>` +
-          ' Error saving details. Please try again.';
-        errorBanner.classList.add('show');
-      }
-      submitBtn.innerHTML = 'Continue to Payment →';
-      submitBtn.disabled = false;
-      showToast('Error saving details', 'error');
-    });
+  try {
+    // Save to Firestore (orders collection for internal tracking)
+    await db.collection('orders').add(orderData);
+    
+    // Update progress dots
+    document.getElementById('progressDot1').classList.remove('active');
+    document.getElementById('progressDot1').classList.add('completed');
+    document.getElementById('progressLineMini').classList.add('filled');
+    document.getElementById('progressDot2').classList.add('active');
+    
+    // Hide step 1, show payment view
+    document.getElementById('checkoutStep1Body').style.display = 'none';
+    const paymentView = document.getElementById('checkoutPaymentView');
+    paymentView.classList.add('visible');
+    
+    showToast('✅ Details saved! Proceeding to payment...', 'success');
+  } catch (err) {
+    console.error('[Checkout Error]', err);
+    if (errorBanner) {
+      errorBanner.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>` +
+        ' Error saving details. Please try again.';
+      errorBanner.classList.add('show');
+    }
+    submitBtn.innerHTML = 'Continue to Payment →';
+    submitBtn.disabled = false;
+    showToast('Error saving details', 'error');
+  }
 }
 
 // ===== Handle Stripe Redirect =====
